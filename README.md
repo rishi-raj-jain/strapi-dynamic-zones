@@ -32,7 +32,7 @@ React Server Components give us that flexibility:
 | Entire page marked `'use client'` | Default to Server Components (all blocks stay on the server) |
 | One giant loading spinner | `loading.tsx` + page-level skeleton + per-block skeleton fallbacks |
 | `populate=*` on every request | Explicit `on` fragments per block type |
-| Awaiting Strapi in `page.tsx` before any HTML | Return `<Suspense>` immediately; fetch layout inside an async child |
+| Awaiting Strapi in `page.tsx` before any HTML | Return `<Suspense>` immediately & fetch layout inside an async child |
 
 The goal is **zero client JavaScript for CMS content** — every block in this guide is a Server Component.
 
