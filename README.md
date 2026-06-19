@@ -1160,6 +1160,8 @@ Wrap `fill` images in a `relative` container with an explicit aspect ratio (such
 
 ## Caching and revalidation
 
+to-do-inthis-section
+
 ### Tag-based revalidation
 
 When editors publish content in Strapi, you can call a Next.js route to bust the cache:
