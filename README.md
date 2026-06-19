@@ -645,6 +645,8 @@ When a visitor opens `/home` with four blocks:
 | Layout resolves | Per-block skeletons for the real page structure | 1 layout request |
 | Each block resolves | Real content replaces that block's skeleton | 1 request per block, in parallel |
 
+![Streaming timeline showing three phases: generic skeleton at 0ms, block-aware skeletons at 200ms, and content streaming in at 500ms+](./streaming-timeline.svg)
+
 There is no `useEffect` and no client-side fetching of CMS content, every interaction with Strapi happens exclusively within async Server Components on the server.
 
 To observe streaming clearly in development, you can wrap the `fetch` call in `fetchBlockById` with a configurable delay: read a `FETCH_DELAY_MS` environment variable and call `await new Promise(r => setTimeout(r, ms))` before returning. Remove that variable before shipping to production.
@@ -691,7 +693,9 @@ Every block follows the same async shell pattern: receive layout props, call `fe
 
 ### Hero block
 
-Create `src/components/blocks/HeroBlock.tsx`:
+![Hero block anatomy showing async shell receiving layout props and pure view rendering the dark hero section](./hero-block.svg)
+
+Create `src/components/blocks/HeroBlock.tsx` to render a full-bleed hero section with an optional background image, heading, subheading, and CTA link:
 
 ```tsx
 // File: src/components/blocks/HeroBlock.tsx
@@ -771,7 +775,7 @@ function HeroBlockView({
 
 The async shell calls `fetchBlockById` with `component: "rich-text.rich-text"`. `RichTextBlockView` renders markdown via `react-markdown` + `remark-gfm`, with an HTML fallback when content looks like markup.
 
-Create `src/lib/richtext.ts`:
+Create `src/lib/richtext.ts` with a single helper that detects whether a string contains HTML markup, so `RichTextBlockView` knows whether to call `dangerouslySetInnerHTML` or `<ReactMarkdown>`:
 
 ```ts
 // File: src/lib/richtext.ts
@@ -848,7 +852,7 @@ If non-trusted roles can edit richtext in your Strapi instance, sanitize the HTM
 
 The async shell calls `fetchBlockById` with `component: "feature-grid.feature-grid"`. This block tends to resolve last in practice because it populates nested feature images. `FeatureGridBlockView` adapts column count to item count and filters empty entries via `normalizeFeatureItems`.
 
-Create `src/lib/feature-grid.ts`:
+Create `src/lib/feature-grid.ts` with two pure helpers: one that filters out empty feature entries before rendering, and one that returns a responsive Tailwind grid class based on the item count:
 
 ```ts
 // File: src/lib/feature-grid.ts
@@ -872,7 +876,7 @@ export function getFeatureGridClassName(count: number) {
 }
 ```
 
-Create `src/components/blocks/FeatureGridBlock.tsx`:
+Create `src/components/blocks/FeatureGridBlock.tsx` to fetch and render a responsive grid of feature cards, each with an optional image, heading, and description:
 
 ```tsx
 // File: src/components/blocks/FeatureGridBlock.tsx
@@ -966,6 +970,8 @@ In the code above:
 
 ## Build the DynamicZoneRenderer
 
+![DynamicZoneRenderer showing per-block Suspense boundaries with hero and rich-text resolved and feature grid still showing its skeleton](./dynamic-zone-renderer.svg)
+
 Every block gets its own `Suspense` boundary. `BlockSlot` is an async server component that delegates to the registry. When a block's `fetchBlockById` suspends, only that block's skeleton shows.
 
 Create `src/components/dynamic-zone/BlockSkeleton.tsx` with a height variant for each block type:
@@ -986,7 +992,7 @@ export function BlockSkeleton({ variant }: { variant: BlockComponentUid | string
 }
 ```
 
-Create `src/components/dynamic-zone/DynamicZoneRenderer.tsx`:
+Create `src/components/dynamic-zone/DynamicZoneRenderer.tsx` to map over the layout blocks, wrap each in its own `Suspense` boundary with a matching skeleton fallback, and delegate rendering to `BlockSlot`:
 
 ```tsx
 // File: src/components/dynamic-zone/DynamicZoneRenderer.tsx
@@ -1254,7 +1260,7 @@ export default ({ env }) => ({
 
 ### Create the Next.js preview route
 
-Create `src/app/api/preview/route.ts`:
+Create `src/app/api/preview/route.ts` to validate the shared secret, toggle Next.js Draft Mode on or off, and redirect to the correct page slug:
 
 ```ts
 // File: src/app/api/preview/route.ts

@@ -1,0 +1,76 @@
+<svg width="700" height="218" viewBox="0 0 700 218" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dz-title dz-desc">
+  <title id="dz-title">DynamicZoneRenderer — Per-Block Suspense Boundaries</title>
+  <desc id="dz-desc">A diagram showing blocks from the layout fetch being mapped into three parallel Suspense boundaries. The hero and rich-text Suspense boundaries have resolved and show their content; the feature-grid boundary is still loading and shows a BlockSkeleton fallback.</desc>
+
+  <defs>
+    <marker id="dz-arrow" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+      <polygon points="0 0, 7 2.5, 0 5" fill="#10b981"/>
+    </marker>
+    <marker id="dz-arrow-sk" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+      <polygon points="0 0, 7 2.5, 0 5" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <!-- card -->
+  <rect width="700" height="218" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- title -->
+  <text x="350" y="18" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="700" fill="#0f172a">DynamicZoneRenderer — Per-Block Suspense Boundaries</text>
+
+  <!-- ── Input: blocks array ── -->
+  <rect x="208" y="26" width="284" height="26" rx="4" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="350" y="36" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="8.5" fill="#334155">blocks: BlockLayout[]  (id + __component only)</text>
+  <text x="350" y="47" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="7.5" fill="#94a3b8">.map() → one Suspense per block</text>
+
+  <!-- fan-out arrows to three columns -->
+  <line x1="350" y1="52" x2="350" y2="60" stroke="#10b981" stroke-width="1.5"/>
+  <line x1="115" y1="60" x2="585" y2="60" stroke="#10b981" stroke-width="1.5"/>
+  <line x1="115" y1="60" x2="115" y2="72" stroke="#10b981" stroke-width="1.5" marker-end="url(#dz-arrow)"/>
+  <line x1="350" y1="60" x2="350" y2="72" stroke="#10b981" stroke-width="1.5" marker-end="url(#dz-arrow)"/>
+  <line x1="585" y1="60" x2="585" y2="72" stroke="#10b981" stroke-width="1.5" marker-end="url(#dz-arrow)"/>
+
+  <!-- ── COLUMN 1: hero (resolved) ── -->
+  <rect x="22" y="72" width="186" height="130" rx="4" fill="#f0fdf4" stroke="#10b981" stroke-width="1.5"/>
+  <text x="115" y="86" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="8" font-weight="700" fill="#15803d">&lt;Suspense&gt;</text>
+  <text x="115" y="97" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="7.5" fill="#86efac">fallback: &lt;BlockSkeleton&gt;</text>
+  <!-- resolved content -->
+  <rect x="32" y="104" width="166" height="88" rx="3" fill="#1e293b"/>
+  <text x="115" y="130" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="8" font-weight="700" fill="#ffffff">Hero Heading</text>
+  <rect x="65" y="138" width="100" height="16" rx="8" fill="#10b981"/>
+  <text x="115" y="150" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="8" font-weight="600" fill="#ffffff">Get started →</text>
+  <text x="115" y="180" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="7.5" fill="#64748b">HeroBlock resolved</text>
+  <!-- resolved badge -->
+  <circle cx="194" cy="80" r="7" fill="#15803d"/>
+  <text x="194" y="84" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="9" font-weight="700" fill="#fff">&#10003;</text>
+
+  <!-- ── COLUMN 2: rich-text (resolved) ── -->
+  <rect x="257" y="72" width="186" height="130" rx="4" fill="#f0fdf4" stroke="#10b981" stroke-width="1.5"/>
+  <text x="350" y="86" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="8" font-weight="700" fill="#15803d">&lt;Suspense&gt;</text>
+  <text x="350" y="97" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="7.5" fill="#86efac">fallback: &lt;BlockSkeleton&gt;</text>
+  <!-- resolved content -->
+  <rect x="267" y="104" width="166" height="88" rx="3" fill="#f0fdf4" stroke="#d1fae5" stroke-width="1"/>
+  <text x="350" y="128" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="8.5" font-weight="600" fill="#14532d">Prose content here</text>
+  <text x="350" y="143" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="7.5" fill="#16a34a">paragraph text rendered</text>
+  <text x="350" y="156" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="7.5" fill="#16a34a">with Tailwind prose classes</text>
+  <text x="350" y="180" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="7.5" fill="#64748b">RichTextBlock resolved</text>
+  <!-- resolved badge -->
+  <circle cx="429" cy="80" r="7" fill="#15803d"/>
+  <text x="429" y="84" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="9" font-weight="700" fill="#fff">&#10003;</text>
+
+  <!-- ── COLUMN 3: feature-grid (loading) ── -->
+  <rect x="492" y="72" width="186" height="130" rx="4" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="585" y="86" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="8" font-weight="700" fill="#64748b">&lt;Suspense&gt;</text>
+  <text x="585" y="97" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="7.5" fill="#94a3b8">fallback: &lt;BlockSkeleton&gt;</text>
+  <!-- skeleton fallback (still loading) -->
+  <rect x="502" y="104" width="166" height="88" rx="3" fill="#e2e8f0"/>
+  <text x="585" y="138" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="8" fill="#94a3b8">fetching nested images…</text>
+  <text x="585" y="155" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="8" fill="#94a3b8">BlockSkeleton visible</text>
+  <text x="585" y="180" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="7.5" fill="#94a3b8">FeatureGridBlock pending</text>
+
+  <!-- legend -->
+  <rect x="22" y="210" width="10" height="6" rx="1" fill="#f0fdf4" stroke="#10b981" stroke-width="1"/>
+  <text x="37" y="216" font-family="system-ui,-apple-system,sans-serif" font-size="8" fill="#475569">resolved</text>
+  <rect x="100" y="210" width="10" height="6" rx="1" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="115" y="216" font-family="system-ui,-apple-system,sans-serif" font-size="8" fill="#475569">loading</text>
+  <text x="220" y="216" font-family="system-ui,-apple-system,sans-serif" font-size="8" fill="#94a3b8">fast blocks paint first — slow blocks (nested images) never delay the others</text>
+</svg>

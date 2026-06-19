@@ -1,0 +1,62 @@
+<svg width="700" height="178" viewBox="0 0 700 178" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hb-title hb-desc">
+  <title id="hb-title">HeroBlock — Async Shell and Pure View Pattern</title>
+  <desc id="hb-desc">Two boxes showing the split: the async shell receives layout props, calls fetchBlockById, and awaits Strapi data; the pure view receives typed props and renders a dark hero section with heading, subheading, and CTA button.</desc>
+
+  <defs>
+    <marker id="hb-arrow" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+      <polygon points="0 0, 7 2.5, 0 5" fill="#10b981"/>
+    </marker>
+    <pattern id="hb-hatch" width="12" height="12" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="12" x2="12" y2="0" stroke="#ffffff" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- card -->
+  <rect width="700" height="178" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- title -->
+  <text x="175" y="18" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="700" fill="#0f172a">HeroBlock — Async Shell + Pure View</text>
+
+  <!-- ── LEFT: Async Shell box ── -->
+  <rect x="20" y="28" width="158" height="112" rx="4" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <rect x="20" y="28" width="158" height="22" rx="4" fill="#e2e8f0"/>
+  <rect x="20" y="38" width="158" height="12" fill="#e2e8f0"/>
+  <text x="99" y="43" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="9" font-weight="700" fill="#334155">Async Shell</text>
+  <text x="30" y="67" font-family="system-ui,-apple-system,sans-serif" font-size="8.5" fill="#64748b">receives: id, slug, status</text>
+  <text x="30" y="82" font-family="system-ui,-apple-system,sans-serif" font-size="8.5" fill="#64748b">calls fetchBlockById()</text>
+  <text x="30" y="97" font-family="system-ui,-apple-system,sans-serif" font-size="8.5" fill="#64748b">awaits Strapi response</text>
+  <text x="30" y="112" font-family="system-ui,-apple-system,sans-serif" font-size="8.5" fill="#64748b">returns view or null</text>
+  <text x="30" y="127" font-family="system-ui,-apple-system,sans-serif" font-size="8" fill="#94a3b8" font-style="italic">HeroBlock (async)</text>
+
+  <!-- arrow shell → view -->
+  <line x1="181" y1="84" x2="202" y2="84" stroke="#10b981" stroke-width="1.5" marker-end="url(#hb-arrow)"/>
+
+  <!-- ── LEFT: Pure View box ── -->
+  <rect x="205" y="28" width="152" height="112" rx="4" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <rect x="205" y="28" width="152" height="22" rx="4" fill="#e2e8f0"/>
+  <rect x="205" y="38" width="152" height="12" fill="#e2e8f0"/>
+  <text x="281" y="43" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="9" font-weight="700" fill="#334155">Pure View</text>
+  <text x="215" y="67" font-family="system-ui,-apple-system,sans-serif" font-size="8.5" fill="#64748b">heading, subheading</text>
+  <text x="215" y="82" font-family="system-ui,-apple-system,sans-serif" font-size="8.5" fill="#64748b">ctaLabel, ctaUrl</text>
+  <text x="215" y="97" font-family="system-ui,-apple-system,sans-serif" font-size="8.5" fill="#64748b">image: StrapiMedia</text>
+  <text x="215" y="112" font-family="system-ui,-apple-system,sans-serif" font-size="8.5" fill="#64748b">renders &lt;section&gt; HTML</text>
+  <text x="215" y="127" font-family="system-ui,-apple-system,sans-serif" font-size="8" fill="#94a3b8" font-style="italic">HeroBlockView (sync)</text>
+
+  <!-- divider -->
+  <line x1="370" y1="18" x2="370" y2="160" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- ── RIGHT: Rendered preview ── -->
+  <rect x="382" y="18" width="300" height="152" rx="4" fill="#1e293b"/>
+  <!-- optional image hatch overlay -->
+  <rect x="382" y="18" width="300" height="152" rx="4" fill="url(#hb-hatch)" opacity="0.08"/>
+  <!-- subheading -->
+  <text x="532" y="50" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="8" font-weight="700" letter-spacing="2" fill="#10b981">POWERED BY STRAPI</text>
+  <!-- heading -->
+  <text x="532" y="74" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="16" font-weight="700" fill="#ffffff">Build Faster with</text>
+  <text x="532" y="94" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="16" font-weight="700" fill="#ffffff">Dynamic Zones</text>
+  <!-- CTA button -->
+  <rect x="472" y="106" width="120" height="28" rx="14" fill="#10b981"/>
+  <text x="532" y="124" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="10" font-weight="600" fill="#ffffff">Get started →</text>
+  <!-- label -->
+  <text x="532" y="160" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="8" fill="#64748b">rendered output</text>
+</svg>
