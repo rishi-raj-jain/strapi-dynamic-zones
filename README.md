@@ -16,7 +16,7 @@ To follow along in this guide, you will need the following:
 
 ![Waterfall timing diagram showing five sequential blocked requests totalling ~2.2 s before the page renders](./waterfall-problem.svg)
 
-Let’s start by looking at a common pattern found in early attempts to build dynamic, CMS-driven pages:
+Let's start by looking at a common pattern found in early attempts to build dynamic, CMS-driven pages:
 
 1. When a visitor arrives, the web application running in their browser kicks off a request to fetch the content for a specific page from the backend API (for example: `/api/pages?filters[slug][$eq]=home`).
 2. Once the page data arrives, the application loops through a list of content blocks (for things like hero banners, testimonials, or videos) and renders each one using a component responsible for that type of block.
@@ -38,11 +38,11 @@ React Server Components give us that flexibility:
 | `populate=*` on every request | Explicit `on` fragments per block type |
 | Awaiting Strapi in `page.tsx` before any HTML | Return `<Suspense>` immediately & fetch layout inside an async child |
 
-to-do-connector
+The sections that follow put this into practice. You will start with the Strapi content model, then configure population strategies, build the two-phase fetch, wire each block to its own async Server Component, and finally add draft preview.
 
 ## Target architecture
 
-to-do-opening
+Before writing any code, it helps to understand the full request path. The diagram below maps what happens from the moment a visitor opens `/home` to each block's content streaming in through its own `Suspense` boundary.
 
 ```mermaid
 flowchart TB
@@ -70,7 +70,7 @@ flowchart TB
   Strapi --> Grid
 ```
 
-Overall, the archiecture to-do:
+The architecture follows five rules that keep every data fetch on the server and every block independently streamable:
 
 | Rule | What it means |
 | --- | --- |
@@ -114,7 +114,7 @@ Once you have saved the schema, open **Settings → API Tokens** (or configure P
 
 ## Create the Next.js frontend
 
-Let’s get started by creating a new Next.js project. Open your terminal and run the following command:
+Let's get started by creating a new Next.js project. Open your terminal and run the following command:
 
 ```bash
 # Create a new Next.js project
@@ -135,6 +135,7 @@ The packages above install the following:
 Next, create a `.env.local` file at the project root with the following values:
 
 ```bash
+# File: .env.local
 NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
 STRAPI_API_TOKEN=your_token_here          # optional but recommended
 PREVIEW_SECRET=long_random_secret           # for draft preview route
@@ -182,13 +183,14 @@ strapi-frontend/
 └── next.config.ts
 ```
 
-to-do-connector
+With the project scaffolded and your environment variables set, you can now create the shared CSS and utility files that all block components will import.
 
 ### Set up Tailwind CSS v4 (and design tokens)
 
 Open `src/app/globals.css` and replace its contents with the following code to integrate Tailwind CSS, the typography plugin, and the shared design tokens used across all blocks:
 
 ```css
+/* File: src/app/globals.css */
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
@@ -212,13 +214,14 @@ Open `src/app/globals.css` and replace its contents with the following code to i
 Then, create a `src/lib/ui.ts` file with the shared layout class names that every block imports:
 
 ```ts
+// File: src/lib/ui.ts
 export const sectionClassName = "mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-12";
 
 export const ctaClassName =
   "inline-flex items-center justify-center rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-hover";
 ```
 
-to-do-connector
+With the design tokens and layout helpers in place, you can now configure how Strapi data is populated for each block type.
 
 ## Configure Dynamic Zone population
 
@@ -227,6 +230,7 @@ In Strapi 5, the shared population strategy for components and Dynamic Zones was
 Create the `src/lib/strapi/populate.ts` file with two population strategies: one that fetches only block ids for the layout phase, and one that fetches full block content per component type:
 
 ```ts
+// File: src/lib/strapi/populate.ts
 import qs from "qs";
 import type { BlockComponentUid } from "./types";
 
@@ -333,6 +337,7 @@ For mostly-static marketing pages, a single fully-populated fetch in `page.tsx` 
 Create `src/lib/strapi/client.ts` with the following code to isolate and reuse Strapi API fetch logic across your application:
 
 ```ts
+// File: src/lib/strapi/client.ts
 import { buildBlockQuery, buildLayoutQuery } from "./populate";
 import type {
   BlockComponentUid,
@@ -426,11 +431,12 @@ In the code above:
 - `fetchBlockById` hits `/api/pages` with an `on` fragment scoped to a single component type, then finds the matching entry by `id`. Each block calls this independently, so their fetches run in parallel.
 - Cache tags (`block:${slug}:${blockId}`) let you revalidate individual blocks from a Strapi webhook without invalidating the whole page.
 
-### to-do-verb Types: layout vs content
+### Define the TypeScript types
 
 Create `src/lib/strapi/types.ts` with the following code that defines every Strapi content type, the `DynamicZoneBlock` discriminated union, and the shared layout helpers:
 
 ```ts
+// File: src/lib/strapi/types.ts
 // ── Strapi media ──────────────────────────────────────────────────────────────
 export interface StrapiMedia {
   url: string;
@@ -515,13 +521,14 @@ In the code above:
 - `BlockShellProps` extends `BlockLayout` with `slug` and `status`, giving each async block everything it needs to call `fetchBlockById`.
 - Full block interfaces (`HeroBlock`, `FeatureGridBlock`, etc.) describe the populated Strapi payload, not the layout shell. They are used only inside each block's view component.
 
-to-do-connector
+With the client and types in place, you can now build the page route and its async child components.
 
-### to-do-dynamic-pages Page route: shell first, fetch inside Suspense
+### Build the page route and skeleton
 
 Create `src/app/[slug]/page.tsx` with the following code, in a way that the page must not await a response from Strapi. It should return the page shell and a `Suspense` boundary immediately:
 
 ```tsx
+// File: src/app/[slug]/page.tsx
 import { Suspense } from "react";
 import { draftMode } from "next/headers";
 import { PageBlocks } from "@/components/dynamic-zone/PageBlocks";
@@ -553,6 +560,7 @@ export default async function PageRoute({ params }: Props) {
 Then, create the `src/components/dynamic-zone/PageBlocks.tsx` file to perform the layout fetch as follows:
 
 ```tsx
+// File: src/components/dynamic-zone/PageBlocks.tsx
 import { notFound } from "next/navigation";
 import { fetchPageLayoutBySlug } from "@/lib/strapi/client";
 import { DynamicZoneRenderer } from "@/components/dynamic-zone/DynamicZoneRenderer";
@@ -587,6 +595,7 @@ export async function PageBlocks({
 Then, create the `src/app/[slug]/loading.tsx` file to show the same skeleton stack on client-side navigations, before `page.tsx` even runs:
 
 ```tsx
+// File: src/app/[slug]/loading.tsx
 import { PageLayoutSkeleton } from "@/components/dynamic-zone/PageLayoutSkeleton";
 
 export default function Loading() {
@@ -601,6 +610,7 @@ export default function Loading() {
 Then, create the `src/components/dynamic-zone/PageLayoutSkeleton.tsx` component that would simply stack the generic block skeletons so something meaningful paints on the first byte (i.e. the first time the page is loaded):
 
 ```tsx
+// File: src/components/dynamic-zone/PageLayoutSkeleton.tsx
 import { BlockSkeleton } from "./BlockSkeleton";
 
 export function PageLayoutSkeleton() {
@@ -617,6 +627,7 @@ export function PageLayoutSkeleton() {
 Finally, redirect the site root to your homepage slug in `src/app/page.tsx`:
 
 ```tsx
+// File: src/app/page.tsx
 import { redirect } from "next/navigation";
 
 export default function Home() {
@@ -624,7 +635,7 @@ export default function Home() {
 }
 ```
 
-### to-do-verb Streaming timeline
+### Streaming timeline
 
 When a visitor opens `/home` with four blocks:
 
@@ -634,15 +645,16 @@ When a visitor opens `/home` with four blocks:
 | Layout resolves | Per-block skeletons for the real page structure | 1 layout request |
 | Each block resolves | Real content replaces that block's skeleton | 1 request per block, in parallel |
 
-to-do-prose **No `useEffect`. No client-side CMS fetches.** Every Strapi call runs in an async Server Component.
+There is no `useEffect` and no client-side fetching of CMS content, every interaction with Strapi happens exclusively within async Server Components on the server.
 
 To observe streaming clearly in development, you can wrap the `fetch` call in `fetchBlockById` with a configurable delay: read a `FETCH_DELAY_MS` environment variable and call `await new Promise(r => setTimeout(r, ms))` before returning. Remove that variable before shipping to production.
 
 ## Build the block registry
 
-to-do-complete Create `src/blocks/registry.ts`:
+Create `src/blocks/registry.ts` as a central registry that maps each Strapi Dynamic Zone block type (`__component` UID) to its corresponding React block component:
 
 ```ts
+// File: src/blocks/registry.ts
 import type { ComponentType } from "react";
 import type { BlockComponentUid, BlockLayout, BlockShellProps } from "@/lib/strapi/types";
 
@@ -675,13 +687,14 @@ Registry entries now accept `BlockShellProps` (`id`, `__component`, `slug`, `sta
 
 ## Build the block components
 
-in this section, to-do Every block follows the same async shell pattern: receive layout props, call `fetchBlockById`, render a presentational child.
+Every block follows the same async shell pattern: receive layout props, call `fetchBlockById`, render a presentational child.
 
-### to-do the Hero (async Server Component)
+### Hero block
 
-to-do-complete Create `src/components/blocks/HeroBlock.tsx`:
+Create `src/components/blocks/HeroBlock.tsx`:
 
 ```tsx
+// File: src/components/blocks/HeroBlock.tsx
 import Link from "next/link";
 import { StrapiImage } from "@/components/StrapiImage";
 import { fetchBlockById } from "@/lib/strapi/client";
@@ -754,21 +767,23 @@ function HeroBlockView({
 
 `RichTextBlock` and `FeatureGridBlock` follow the same shell → view pattern. The sections below show their complete files.
 
-### to-do Rich text (async Server Component)
+### Rich text block
 
 The async shell calls `fetchBlockById` with `component: "rich-text.rich-text"`. `RichTextBlockView` renders markdown via `react-markdown` + `remark-gfm`, with an HTML fallback when content looks like markup.
 
-to-do-complete Create `src/lib/richtext.ts`:
+Create `src/lib/richtext.ts`:
 
 ```ts
+// File: src/lib/richtext.ts
 export function isRichTextHtml(content: string) {
   return /<[a-z][\s\S]*>/i.test(content);
 }
 ```
 
-to-do-complete Create `src/components/blocks/RichTextBlock.tsx`:
+Create `src/components/blocks/RichTextBlock.tsx`:
 
 ```tsx
+// File: src/components/blocks/RichTextBlock.tsx
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { fetchBlockById } from "@/lib/strapi/client";
@@ -824,17 +839,19 @@ function RichTextBlockView({ content }: RichTextBlockData) {
 
 In the code above:
 
-- to-do
+- The async shell fetches the block data and returns `null` if it is missing, so the section simply disappears rather than rendering empty space.
+- `RichTextBlockView` detects whether the content is HTML or Markdown and renders accordingly, applying `prose` utility classes for consistent typography.
 
 If non-trusted roles can edit richtext in your Strapi instance, sanitize the HTML before rendering it (for example with `isomorphic-dompurify`) to prevent XSS.
 
-### to-do Feature grid (async Server Component)
+### Feature grid block
 
 The async shell calls `fetchBlockById` with `component: "feature-grid.feature-grid"`. This block tends to resolve last in practice because it populates nested feature images. `FeatureGridBlockView` adapts column count to item count and filters empty entries via `normalizeFeatureItems`.
 
-to-do-complete Create `src/lib/feature-grid.ts`:
+Create `src/lib/feature-grid.ts`:
 
 ```ts
+// File: src/lib/feature-grid.ts
 import type { FeatureItem } from "@/lib/strapi/types";
 
 export function normalizeFeatureItems(
@@ -855,9 +872,10 @@ export function getFeatureGridClassName(count: number) {
 }
 ```
 
-to-do-complete Create `src/components/blocks/FeatureGridBlock.tsx`:
+Create `src/components/blocks/FeatureGridBlock.tsx`:
 
 ```tsx
+// File: src/components/blocks/FeatureGridBlock.tsx
 import { fetchBlockById } from "@/lib/strapi/client";
 import { StrapiImage } from "@/components/StrapiImage";
 import {
@@ -943,16 +961,17 @@ function FeatureGridBlockView({ title, feature }: FeatureGridBlockData) {
 
 In the code above:
 
-- 
-- 
+- `normalizeFeatureItems` filters out empty feature entries before computing the grid layout, so editors can leave placeholder rows in Strapi without breaking the UI.
+- `getFeatureGridClassName` adapts the column count to the number of items, so a two-feature grid splits into halves while a single feature takes the full width.
 
-## to-do-verb DynamicZoneRenderer with streaming
+## Build the DynamicZoneRenderer
 
 Every block gets its own `Suspense` boundary. `BlockSlot` is an async server component that delegates to the registry. When a block's `fetchBlockById` suspends, only that block's skeleton shows.
 
-to-do-complete Create `src/components/dynamic-zone/BlockSkeleton.tsx` with a height variant for each block type:
+Create `src/components/dynamic-zone/BlockSkeleton.tsx` with a height variant for each block type:
 
 ```tsx
+// File: src/components/dynamic-zone/BlockSkeleton.tsx
 import type { BlockComponentUid } from "@/lib/strapi/types";
 
 const heights: Partial<Record<string, string>> = {
@@ -967,9 +986,10 @@ export function BlockSkeleton({ variant }: { variant: BlockComponentUid | string
 }
 ```
 
-to-do-complete Create `src/components/dynamic-zone/DynamicZoneRenderer.tsx`:
+Create `src/components/dynamic-zone/DynamicZoneRenderer.tsx`:
 
 ```tsx
+// File: src/components/dynamic-zone/DynamicZoneRenderer.tsx
 import { Suspense } from "react";
 import { blockRegistry } from "@/blocks/registry";
 import { BlockSkeleton } from "./BlockSkeleton";
@@ -1033,12 +1053,12 @@ export function DynamicZoneRenderer({
 
 In the code above:
 
-- 
-- 
+- `BlockSlot` is an async Server Component that receives only the block's shell props and delegates to the registry. The `switch` statement narrows the `__component` discriminant so TypeScript can verify the props match each block's type.
+- `DynamicZoneRenderer` wraps each `BlockSlot` in its own `Suspense` boundary, which means a slow block (the feature grid loading nested images) never delays a fast block (hero or rich text) from rendering.
 
 `BlockSkeleton` has a variant per block type (`hero.hero`, `feature-grid.feature-grid`, etc.) so each fallback matches the real section layout.
 
-### to-do-use-streaming-word-verb Why this streams
+### Why this streams
 
 1. `page.tsx` never awaits Strapi. The `Suspense` fallback (`PageLayoutSkeleton`) streams on the first byte.
 2. `PageBlocks` resolves the layout. Per-block skeletons replace the generic stack.
@@ -1049,7 +1069,7 @@ All blocks in this guide are Server Components — `DynamicZoneRenderer` stays o
 When you add an interactive block later (accordion, map, carousel), split it into an async server shell that fetches data and a `'use client'` child for UI, or use `next/dynamic` to lazy-load the client bundle:
 
 ```tsx
-// blocks/registry.ts (excerpt — future interactive block)
+// File: src/blocks/registry.ts (excerpt — future interactive block)
 import dynamic from "next/dynamic";
 
 const MapBlock = dynamic(() => import("@/components/blocks/MapBlock"), {
@@ -1064,6 +1084,7 @@ Next.js 16 blocks localhost image optimization by default. When your Strapi inst
 Update `next.config.ts` with the following code:
 
 ```ts
+// File: next.config.ts
 import type { NextConfig } from "next";
 
 const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL ?? "http://localhost:1337";
@@ -1092,6 +1113,7 @@ Note that `dangerouslyAllowLocalIP` is only needed in development when Strapi ru
 Create `src/lib/utils.ts` with the following to handle the image URL switch:
 
 ```ts
+// File: src/lib/utils.ts
 export function getStrapiMediaUrl(path: string) {
   const base = (process.env.NEXT_PUBLIC_STRAPI_URL ?? "http://localhost:1337").replace(
     /"/g,
@@ -1102,9 +1124,10 @@ export function getStrapiMediaUrl(path: string) {
 }
 ```
 
-to-do-begin `src/components/StrapiImage.tsx` supports both fixed dimensions and `fill` mode. Use `fill` for hero and feature images when Strapi omits `width`/`height` (for example with AVIF uploads):
+Create `src/components/StrapiImage.tsx`. It supports both fixed dimensions and `fill` mode. Use `fill` for hero and feature images when Strapi omits `width`/`height` (for example with AVIF uploads):
 
 ```tsx
+// File: src/components/StrapiImage.tsx
 import Image from "next/image";
 import { getStrapiMediaUrl } from "@/lib/utils";
 import type { StrapiMedia } from "@/lib/strapi/types";
@@ -1160,13 +1183,14 @@ Wrap `fill` images in a `relative` container with an explicit aspect ratio (such
 
 ## Caching and revalidation
 
-to-do-inthis-section
+By default, all `fetch` calls in `client.ts` use `cache: "force-cache"`, so Next.js stores the response in the Data Cache and serves it on subsequent requests without hitting Strapi again. This section shows two complementary strategies to keep that cache fresh: tag-based revalidation triggered by a Strapi webhook, and a time-based fallback for mostly-static sites.
 
 ### Tag-based revalidation
 
 Create `src/app/api/revalidate/route.ts` to create such a route that you can to bust the cache whenever editors publish content in Strapi:
 
 ```ts
+// File: src/app/api/revalidate/route.ts
 import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
@@ -1186,13 +1210,14 @@ export async function POST(request: Request) {
 }
 ```
 
-Rishi: Set up a Strapi webhook on `entry.publish` that calls this route and passes the secret header. Note that in Next.js 16, `revalidateTag` requires a second argument (`"max"` is the recommended profile) and omitting it is a type error.
+Set up a Strapi webhook on `entry.publish` that calls this route and passes the secret header. Note that in Next.js 16, `revalidateTag` requires a second argument (`"max"` is the recommended profile) and omitting it is a type error.
 
 ### Time-based fallback
 
 If your site is mostly static, you can also combine cache tags with a `revalidate` interval on `fetch`:
 
 ```ts
+// Option to add to fetch() calls in src/lib/strapi/client.ts
 next: { revalidate: 300, tags: [`page:${slug}`] },
 ```
 
@@ -1200,11 +1225,12 @@ next: { revalidate: 300, tags: [`page:${slug}`] },
 
 In Strapi 5, we replaced `publicationState` with `status` (`draft` | `published`) ([migration guide](https://docs.strapi.io/cms/migration/v4-to-v5/breaking-changes/publication-state-removed)). You will pair that with [Next.js Draft Mode](https://nextjs.org/docs/app/guides/draft-mode).
 
-### to-do-verb Strapi admin preview config
+### Configure Strapi admin preview
 
 In `config/admin.ts` of your Strapi project, configure preview URLs to point to your Next.js route ([Preview feature docs](https://docs.strapi.io/cms/features/preview)):
 
 ```ts
+// File: config/admin.ts
 export default ({ env }) => ({
   preview: {
     enabled: true,
@@ -1226,11 +1252,12 @@ export default ({ env }) => ({
 });
 ```
 
-### to-do Next.js preview route
+### Create the Next.js preview route
 
-Create `src/app/api/preview/route.ts` to to-do:
+Create `src/app/api/preview/route.ts`:
 
 ```ts
+// File: src/app/api/preview/route.ts
 import { draftMode } from "next/headers";
 import { redirect } from "next/navigation";
 
