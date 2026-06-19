@@ -29,7 +29,7 @@ React Server Components give us that flexibility:
 | Anti-pattern | RSC-friendly approach |
 | --- | --- |
 | `useEffect` + `fetch` per block on the client | Per-block `fetch` in **async Server Components**, wrapped in `Suspense` |
-| Entire page marked `'use client'` | Default to Server Components; all blocks stay on the server |
+| Entire page marked `'use client'` | Default to Server Components (all blocks stay on the server) |
 | One giant loading spinner | `loading.tsx` + page-level skeleton + per-block skeleton fallbacks |
 | `populate=*` on every request | Explicit `on` fragments per block type |
 | Awaiting Strapi in `page.tsx` before any HTML | Return `<Suspense>` immediately; fetch layout inside an async child |
