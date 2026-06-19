@@ -675,11 +675,11 @@ Registry entries now accept `BlockShellProps` (`id`, `__component`, `slug`, `sta
 
 ## Build the block components
 
-Every block follows the same async shell pattern: receive layout props, call `fetchBlockById`, render a presentational child.
+in this section, to-do Every block follows the same async shell pattern: receive layout props, call `fetchBlockById`, render a presentational child.
 
-### Hero (async Server Component)
+### to-do the Hero (async Server Component)
 
-Create `src/components/blocks/HeroBlock.tsx`:
+to-do-complete Create `src/components/blocks/HeroBlock.tsx`:
 
 ```tsx
 import Link from "next/link";
@@ -754,11 +754,11 @@ function HeroBlockView({
 
 `RichTextBlock` and `FeatureGridBlock` follow the same shell → view pattern. The sections below show their complete files.
 
-### Rich text (async Server Component)
+### to-do Rich text (async Server Component)
 
 The async shell calls `fetchBlockById` with `component: "rich-text.rich-text"`. `RichTextBlockView` renders markdown via `react-markdown` + `remark-gfm`, with an HTML fallback when content looks like markup.
 
-Create `src/lib/richtext.ts`:
+to-do-complete Create `src/lib/richtext.ts`:
 
 ```ts
 export function isRichTextHtml(content: string) {
@@ -766,7 +766,7 @@ export function isRichTextHtml(content: string) {
 }
 ```
 
-Create `src/components/blocks/RichTextBlock.tsx`:
+to-do-complete Create `src/components/blocks/RichTextBlock.tsx`:
 
 ```tsx
 import ReactMarkdown from "react-markdown";
@@ -822,13 +822,17 @@ function RichTextBlockView({ content }: RichTextBlockData) {
 }
 ```
 
+In the code above:
+
+- to-do
+
 If non-trusted roles can edit richtext in your Strapi instance, sanitize the HTML before rendering it (for example with `isomorphic-dompurify`) to prevent XSS.
 
-### Feature grid (async Server Component)
+### to-do Feature grid (async Server Component)
 
 The async shell calls `fetchBlockById` with `component: "feature-grid.feature-grid"`. This block tends to resolve last in practice because it populates nested feature images. `FeatureGridBlockView` adapts column count to item count and filters empty entries via `normalizeFeatureItems`.
 
-Create `src/lib/feature-grid.ts`:
+to-do-complete Create `src/lib/feature-grid.ts`:
 
 ```ts
 import type { FeatureItem } from "@/lib/strapi/types";
@@ -851,7 +855,7 @@ export function getFeatureGridClassName(count: number) {
 }
 ```
 
-Create `src/components/blocks/FeatureGridBlock.tsx`:
+to-do-complete Create `src/components/blocks/FeatureGridBlock.tsx`:
 
 ```tsx
 import { fetchBlockById } from "@/lib/strapi/client";
@@ -936,6 +940,11 @@ function FeatureGridBlockView({ title, feature }: FeatureGridBlockData) {
   );
 }
 ```
+
+In the code above:
+
+- 
+- 
 
 ## DynamicZoneRenderer with streaming
 
