@@ -126,7 +126,7 @@ npm install qs react-markdown remark-gfm
 npm install -D @tailwindcss/typography @types/qs
 ```
 
-The packages above provide the following:
+The packages above install the following:
 
 - `qs`: builds the nested query strings that Strapi's REST API requires for filters, population, and status parameters.
 - `react-markdown` & `remark-gfm`: renders markdown stored in Strapi richtext fields as HTML, with GitHub Flavored Markdown support (tables, strikethrough, task lists).
@@ -141,7 +141,7 @@ PREVIEW_SECRET=long_random_secret           # for draft preview route
 REVALIDATE_SECRET=another_long_secret       # for on-demand revalidation webhook
 ```
 
-The following is the folder structure you will end up with by the end of this guide:
+Now before you proceed to the next step, here is the folder structure you will end up with by the end of this guide:
 
 ```
 strapi-frontend/
