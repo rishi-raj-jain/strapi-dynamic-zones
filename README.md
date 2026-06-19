@@ -14,13 +14,14 @@ To follow along in this guide, you will need the following:
 
 ## The waterfall problem
 
+![Waterfall timing diagram showing five sequential blocked requests totalling ~2.2 s before the page renders](./waterfall-problem.svg)
+
 Let’s start by looking at a common pattern found in early attempts to build dynamic, CMS-driven pages:
 
 1. When a visitor arrives, the web application running in their browser kicks off a request to fetch the content for a specific page from the backend API (for example: `/api/pages?filters[slug][$eq]=home`).
 2. Once the page data arrives, the application loops through a list of content blocks (for things like hero banners, testimonials, or videos) and renders each one using a component responsible for that type of block.
 3. But many of these components then trigger their own additional data requests. For example: an image block fetches different image sizes, a testimonial grid goes and loads author info, or a video block lazy-loads the video player.
 
-![Waterfall timing diagram showing five sequential blocked requests totalling ~2.2 s before the page renders](./waterfall-problem.svg)
 
 This approach creates a chain of delays. Nothing on the page can be displayed until all the supporting JavaScript code has loaded, the initial data has been fetched, and each of these nested requests has also completed. The end result is that users have to wait longer to see the content, especially for marketing sites powered by a CMS.
 
