@@ -598,7 +598,7 @@ export default function Loading() {
 }
 ```
 
-The `PageLayoutSkeleton` component would simply stack the generic block skeletons so something meaningful paints on the first byte (i.e. the first time the page is loaded):
+Then, create the `src/components/dynamic-zone/PageLayoutSkeleton.tsx` component that would simply stack the generic block skeletons so something meaningful paints on the first byte (i.e. the first time the page is loaded):
 
 ```tsx
 import { BlockSkeleton } from "./BlockSkeleton";
