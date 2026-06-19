@@ -550,7 +550,7 @@ export default async function PageRoute({ params }: Props) {
 }
 ```
 
-Create `src/components/dynamic-zone/PageBlocks.tsx` to perform the layout fetch as follows:
+Then, create the `src/components/dynamic-zone/PageBlocks.tsx` file to perform the layout fetch as follows:
 
 ```tsx
 import { notFound } from "next/navigation";
@@ -584,7 +584,7 @@ export async function PageBlocks({
 }
 ```
 
-Further, create `src/app/[slug]/loading.tsx` to show the same skeleton stack on client-side navigations, before `page.tsx` even runs:
+Then, create the `src/app/[slug]/loading.tsx` file to show the same skeleton stack on client-side navigations, before `page.tsx` even runs:
 
 ```tsx
 import { PageLayoutSkeleton } from "@/components/dynamic-zone/PageLayoutSkeleton";
