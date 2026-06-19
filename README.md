@@ -125,7 +125,7 @@ npm install -D @tailwindcss/typography @types/qs
 The packages above provide the following:
 
 - `qs`: builds the nested query strings that Strapi's REST API requires for filters, population, and status parameters.
-- `react-markdown` + `remark-gfm`: renders markdown stored in Strapi richtext fields as HTML, with GitHub Flavored Markdown support (tables, strikethrough, task lists).
+- `react-markdown` & `remark-gfm`: renders markdown stored in Strapi richtext fields as HTML, with GitHub Flavored Markdown support (tables, strikethrough, task lists).
 - `@tailwindcss/typography`: the `prose` utility class for styling rendered richtext without writing custom CSS.
 
 Create a `.env.local` file at the project root with the following values:
