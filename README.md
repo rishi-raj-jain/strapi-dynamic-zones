@@ -40,6 +40,10 @@ React Server Components give us that flexibility:
 
 The sections that follow put this into practice. You will start with the Strapi content model, then configure population strategies, build the two-phase fetch, wire each block to its own async Server Component, and finally add draft preview.
 
+## Demo
+
+https://github.com/user-attachments/assets/5728e2b0-caf8-4413-99c9-c3204be08ad5
+
 ## Target architecture
 
 Before writing any code, it helps to understand the full request path. The diagram below maps what happens from the moment a visitor opens `/home` to each block's content streaming in through its own `Suspense` boundary.
