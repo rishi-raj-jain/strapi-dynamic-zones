@@ -222,9 +222,9 @@ to-do-connector
 
 ## Configure Dynamic Zone population
 
-In Strapi 5, we removed the shared population strategy for components and Dynamic Zones. You must use **`on` fragments** to declare population per component type ([docs](https://docs.strapi.io/cms/migration/v4-to-v5/breaking-changes/no-shared-population-strategy-components-dynamic-zones)).
+In Strapi 5, the shared population strategy for components and Dynamic Zones was removed. You must use **`on` fragments** to declare population per component type ([docs](https://docs.strapi.io/cms/migration/v4-to-v5/breaking-changes/no-shared-population-strategy-components-dynamic-zones)).
 
-Create `src/lib/strapi/populate.ts` with two population strategies: one that fetches only block ids for the layout phase, and one that fetches full block content per component type:
+Create the `src/lib/strapi/populate.ts` file with two population strategies: one that fetches only block ids for the layout phase, and one that fetches full block content per component type:
 
 ```ts
 import qs from "qs";
