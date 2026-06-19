@@ -1164,9 +1164,7 @@ to-do-inthis-section
 
 ### Tag-based revalidation
 
-When editors publish content in Strapi, you can call a Next.js route to bust the cache:
-
-Create `src/app/api/revalidate/route.ts`:
+Create `src/app/api/revalidate/route.ts` to create such a route that you can to bust the cache whenever editors publish content in Strapi:
 
 ```ts
 import { revalidateTag } from "next/cache";
