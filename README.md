@@ -209,7 +209,7 @@ Open `src/app/globals.css` and replace its contents with the following code to i
 }
 ```
 
-Create a `src/lib/ui.ts` file with the shared layout class names that every block imports:
+Then, create a `src/lib/ui.ts` file with the shared layout class names that every block imports:
 
 ```ts
 export const sectionClassName = "mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-12";
