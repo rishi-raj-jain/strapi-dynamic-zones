@@ -178,9 +178,11 @@ strapi-frontend/
 └── next.config.ts
 ```
 
-### Set up Tailwind v4 and design tokens
+to-do-connector
 
-Open `src/app/globals.css` and replace its contents with the following to wire up Tailwind v4, the typography plugin, and the shared design tokens used across all blocks:
+### Set up Tailwind CSS v4 (and design tokens)
+
+Open `src/app/globals.css` and replace its contents with the following code to integrate Tailwind CSS, the typography plugin, and the shared design tokens used across all blocks:
 
 ```css
 @import "tailwindcss";
@@ -203,7 +205,7 @@ Open `src/app/globals.css` and replace its contents with the following to wire u
 }
 ```
 
-Create `src/lib/ui.ts` with the shared layout class names that every block imports:
+Create a `src/lib/ui.ts` file with the shared layout class names that every block imports:
 
 ```ts
 export const sectionClassName = "mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-12";
