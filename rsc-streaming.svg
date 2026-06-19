@@ -1,0 +1,105 @@
+<svg width="700" height="298" viewBox="0 0 700 298" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="rsc-title rsc-desc">
+  <title id="rsc-title">RSC Solution: Parallel Server Fetches and Streaming HTML</title>
+  <desc id="rsc-desc">A timing diagram showing three block fetches running in parallel on the server after a fast 200ms layout fetch, while the browser receives skeleton HTML at 0ms and content streams in progressively at 500ms, 600ms, and 900ms — far faster than the waterfall's 2.2 seconds.</desc>
+
+  <defs>
+    <clipPath id="browser-bar-clip">
+      <rect x="180" y="238" width="500" height="26" rx="3"/>
+    </clipPath>
+  </defs>
+
+  <!-- card background -->
+  <rect width="700" height="298" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- title -->
+  <text x="350" y="22" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" fill="#0f172a">RSC Solution: Server Fetches Run in Parallel</text>
+  <text x="350" y="37" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#64748b">Skeleton arrives at 0ms — content streams in as each server fetch resolves</text>
+
+  <!-- legend -->
+  <g transform="translate(192,47)" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#64748b">
+    <rect width="8" height="8" rx="2" fill="#10b981"/><text x="11" y="8">server fetch</text>
+    <rect x="90" width="8" height="8" rx="2" fill="#e2e8f0" stroke="#d1d5db" stroke-width="0.5"/><text x="101" y="8">skeleton</text>
+    <rect x="155" width="8" height="8" rx="2" fill="#bbf7d0"/><text x="166" y="8">content streamed in</text>
+    <circle cx="274" cy="4" r="4" fill="#15803d"/><text x="281" y="8">resolved</text>
+  </g>
+
+  <!-- time axis labels -->
+  <g font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#94a3b8" text-anchor="middle">
+    <text x="180" y="64">0</text>
+    <text x="280" y="64">200ms</text>
+    <text x="430" y="64">500ms</text>
+    <text x="480" y="64">600ms</text>
+    <text x="630" y="64">900ms</text>
+    <text x="680" y="64">1s</text>
+  </g>
+
+  <!-- axis line + ticks -->
+  <line x1="180" y1="68" x2="680" y2="68" stroke="#e2e8f0" stroke-width="1"/>
+  <g stroke="#d1d5db" stroke-width="1">
+    <line x1="180" y1="68" x2="180" y2="72"/>
+    <line x1="280" y1="68" x2="280" y2="72"/>
+    <line x1="430" y1="68" x2="430" y2="72"/>
+    <line x1="480" y1="68" x2="480" y2="72"/>
+    <line x1="630" y1="68" x2="630" y2="72"/>
+    <line x1="680" y1="68" x2="680" y2="72"/>
+  </g>
+
+  <!-- vertical grid lines -->
+  <g stroke="#f1f5f9" stroke-width="1">
+    <line x1="430" y1="72" x2="430" y2="232"/>
+    <line x1="480" y1="72" x2="480" y2="232"/>
+    <line x1="630" y1="72" x2="630" y2="232"/>
+  </g>
+
+  <!-- SERVER section background (exactly matches chart area) -->
+  <rect x="180" y="74" width="500" height="156" rx="4" fill="#f0fdf4" stroke="#d1fae5" stroke-width="1"/>
+  <text x="174" y="72" text-anchor="end" font-family="system-ui,-apple-system,sans-serif" font-size="9" font-weight="700" fill="#15803d">SERVER</text>
+
+  <!-- ── layout fetch (0–200ms) ── -->
+  <text x="172" y="99" text-anchor="end" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#475569">layout</text>
+  <rect x="180" y="82" width="100" height="26" rx="3" fill="#10b981"/>
+  <text x="230" y="99" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="9" font-weight="600" fill="#ffffff">fast fetch</text>
+
+  <!-- parallel-start alignment marker -->
+  <line x1="280" y1="72" x2="280" y2="230" stroke="#10b981" stroke-width="1.5" stroke-dasharray="3,2" opacity="0.35"/>
+
+  <!-- ── hero fetch (200–600ms) ── -->
+  <text x="172" y="137" text-anchor="end" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#475569">hero fetch</text>
+  <rect x="280" y="120" width="200" height="26" rx="3" fill="#10b981"/>
+  <text x="380" y="137" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="9" font-weight="600" fill="#ffffff">async server fetch</text>
+  <circle cx="480" cy="133" r="9" fill="#15803d"/>
+  <text x="480" y="137" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="10" font-weight="700" fill="#ffffff">&#10003;</text>
+
+  <!-- ── rich text fetch (200–500ms) ── -->
+  <text x="172" y="177" text-anchor="end" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#475569">rich text</text>
+  <rect x="280" y="160" width="150" height="26" rx="3" fill="#10b981"/>
+  <text x="355" y="177" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="9" font-weight="600" fill="#ffffff">async server fetch</text>
+  <circle cx="430" cy="173" r="9" fill="#15803d"/>
+  <text x="430" y="177" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="10" font-weight="700" fill="#ffffff">&#10003;</text>
+
+  <!-- ── feature grid fetch (200–900ms) ── -->
+  <text x="172" y="217" text-anchor="end" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#475569">feature grid</text>
+  <rect x="280" y="200" width="350" height="26" rx="3" fill="#10b981"/>
+  <text x="455" y="217" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="9" font-weight="600" fill="#ffffff">async server fetch (nested images)</text>
+  <circle cx="630" cy="213" r="9" fill="#15803d"/>
+  <text x="630" y="217" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="10" font-weight="700" fill="#ffffff">&#10003;</text>
+
+  <!-- BROWSER section label -->
+  <text x="174" y="252" text-anchor="end" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#475569">user sees</text>
+
+  <!-- browser bar: skeleton base + progressive content fill (clipped to rounded rect) -->
+  <g clip-path="url(#browser-bar-clip)">
+    <rect x="180" y="238" width="500" height="26" fill="#e2e8f0"/>
+    <rect x="430" y="238" width="250" height="26" fill="#bbf7d0"/>
+  </g>
+  <!-- labels inside browser bar -->
+  <text x="305" y="255" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#64748b">skeleton at 0ms</text>
+  <text x="555" y="255" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#166534">content streaming in</text>
+
+  <!-- "first content" bracket -->
+  <line x1="180" y1="271" x2="430" y2="271" stroke="#16a34a" stroke-width="1.5"/>
+  <line x1="180" y1="266" x2="180" y2="276" stroke="#16a34a" stroke-width="1.5"/>
+  <line x1="430" y1="266" x2="430" y2="276" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="305" y="287" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="10" font-weight="600" fill="#16a34a">~500ms to first content</text>
+  <text x="557" y="287" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#94a3b8">vs ~2.2s with the waterfall</text>
+</svg>

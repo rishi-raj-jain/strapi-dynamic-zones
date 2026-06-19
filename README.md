@@ -28,6 +28,8 @@ The better solution is to move these data fetches to the server, so the HTML can
 
 React Server Components give us that flexibility:
 
+![RSC streaming diagram showing parallel server fetches and skeleton HTML arriving at 0ms, with content streaming in progressively](./rsc-streaming.svg)
+
 | Anti-pattern | RSC-friendly approach |
 | --- | --- |
 | `useEffect` + `fetch` per block on the client | Per-block `fetch` in **async Server Components**, wrapped in `Suspense` |
