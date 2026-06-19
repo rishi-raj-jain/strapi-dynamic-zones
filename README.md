@@ -1186,7 +1186,7 @@ export async function POST(request: Request) {
 }
 ```
 
-Set up a Strapi webhook on `entry.publish` that calls this route and passes the secret header. Note that in Next.js 16, `revalidateTag` requires a second argument (`"max"` is the recommended profile) and omitting it is a type error.
+Rishi: Set up a Strapi webhook on `entry.publish` that calls this route and passes the secret header. Note that in Next.js 16, `revalidateTag` requires a second argument (`"max"` is the recommended profile) and omitting it is a type error.
 
 ### Time-based fallback
 
@@ -1200,7 +1200,7 @@ next: { revalidate: 300, tags: [`page:${slug}`] },
 
 In Strapi 5, we replaced `publicationState` with `status` (`draft` | `published`) ([migration guide](https://docs.strapi.io/cms/migration/v4-to-v5/breaking-changes/publication-state-removed)). You will pair that with [Next.js Draft Mode](https://nextjs.org/docs/app/guides/draft-mode).
 
-### Strapi admin preview config
+### to-do-verb Strapi admin preview config
 
 In `config/admin.ts` of your Strapi project, configure preview URLs to point to your Next.js route ([Preview feature docs](https://docs.strapi.io/cms/features/preview)):
 
@@ -1226,9 +1226,9 @@ export default ({ env }) => ({
 });
 ```
 
-### Next.js preview route
+### to-do Next.js preview route
 
-Create `src/app/api/preview/route.ts`:
+Create `src/app/api/preview/route.ts` to to-do:
 
 ```ts
 import { draftMode } from "next/headers";
