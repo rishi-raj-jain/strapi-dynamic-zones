@@ -22,7 +22,6 @@ Let’s start by looking at a common pattern found in early attempts to build dy
 2. Once the page data arrives, the application loops through a list of content blocks (for things like hero banners, testimonials, or videos) and renders each one using a component responsible for that type of block.
 3. But many of these components then trigger their own additional data requests. For example: an image block fetches different image sizes, a testimonial grid goes and loads author info, or a video block lazy-loads the video player.
 
-
 This approach creates a chain of delays. Nothing on the page can be displayed until all the supporting JavaScript code has loaded, the initial data has been fetched, and each of these nested requests has also completed. The end result is that users have to wait longer to see the content, especially for marketing sites powered by a CMS.
 
 The better solution is to move these data fetches to the server, so the HTML can start arriving and rendering immediately (even before all data is resolved) making for a much faster and more user-friendly experience.
