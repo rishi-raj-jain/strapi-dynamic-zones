@@ -14,7 +14,7 @@ To follow along in this guide, you will need the following:
 
 ## The waterfall problem
 
-![Waterfall timing diagram showing five sequential blocked requests totalling ~2.2 s before the page renders](./waterfall-problem.svg)
+![Waterfall timing diagram showing five sequential blocked requests totalling ~2.2 s before the page renders](./images/waterfall-problem.svg)
 
 Let's start by looking at a common pattern found in early attempts to build dynamic, CMS-driven pages:
 
@@ -28,7 +28,7 @@ The better solution is to move these data fetches to the server, so the HTML can
 
 React Server Components give us that flexibility:
 
-![RSC streaming diagram showing parallel server fetches and skeleton HTML arriving at 0ms, with content streaming in progressively](./rsc-streaming.svg)
+![RSC streaming diagram showing parallel server fetches and skeleton HTML arriving at 0ms, with content streaming in progressively](./images/rsc-streaming.svg)
 
 | Anti-pattern | RSC-friendly approach |
 | --- | --- |
@@ -42,7 +42,7 @@ The sections that follow put this into practice. You will start with the Strapi 
 
 ## Demo
 
-to-do-fix Before go guide see the demo below where even though you see skeleton loading immediately there is no client side fetch request is made but the content streams in from the blocks configured in Strapi:
+Before diving into the code, here is the finished result in action. The skeleton appears instantly on navigation, and each block's content streams in as its server fetch resolves, with no client-side request to Strapi at all:
 
 https://github.com/user-attachments/assets/5728e2b0-caf8-4413-99c9-c3204be08ad5
 
@@ -88,35 +88,117 @@ The architecture follows five rules that keep every data fetch on the server and
 
 ## Create the content model in Strapi
 
-Start by creating a **Page** collection type in Strapi with these fields:
+Let's start in Strapi by modeling the pages that editors will fill in. The goal is a **Page** collection type with a `blocks` Dynamic Zone containing three reusable components (a hero, a rich-text block, and a feature grid) that editors can arrange in any order. The table below summarises the full schema; the step-by-step walkthrough that follows shows every click.
 
-| Field | Type | Notes |
-| --- | --- | --- |
-| `title` | Text | SEO / admin |
-| `slug` | Text or UID | Used in `/api/pages?filters[slug][$eq]=...` |
-| `blocks` | Dynamic Zone | Add components below |
-
-Make sure to enable **Draft & Publish** on the Page type if you want preview support later.
-
-### Dynamic Zone components
-
-In Strapi 5, component UIDs follow the `category.component` naming pattern (the folder name and the component file name). In the Content-Type Builder, create these under **Components**:
-
-| UID | Fields | Nested components | Render as |
-| --- | --- | --- | --- |
-| `hero.hero` | `heading`, `subheading`, `ctaLabel`, `ctaUrl`, `image` (media) | None | Server Component |
-| `rich-text.rich-text` | `content` (richtext / markdown) | None | Server Component |
-| `feature-grid.feature-grid` | `title`, `feature` (repeatable) | `features.features` | Server Component |
-
-Nested component schema:
-
-| UID | Fields |
+| Collection type | Fields |
 | --- | --- |
-| `features.features` | `heading`, `subtext` (text), `image` (media) |
+| **Page** | `title` (Text), `slug` (Text), `blocks` (Dynamic Zone) |
 
-The feature grid uses `feature` (not `features`). You will normalize repeatable items in a small helper module so the block component stays clean.
+| Component UID | Fields | Notes |
+| --- | --- | --- |
+| `hero.hero` | `heading`, `subheading`, `ctaLabel`, `ctaUrl`, `image` | Single media |
+| `rich-text.rich-text` | `content` | Rich text (Markdown) |
+| `feature-grid.feature-grid` | `title`, `feature` (repeatable → `features.features`) | Nested component |
+| `features.features` | `heading`, `subtext`, `image` | Single media |
 
-Once you have saved the schema, open **Settings → API Tokens** (or configure Public role permissions) so your Next.js app can `find` pages with populated `blocks`. Create a page with slug `home` for the root redirect you will add later.
+### Upload a sample image to the Media Library
+
+Before building any schema, upload a placeholder image so you can link it to the hero and each feature card as you fill in the example page. Open **Media Library** from the left nav, click **Add new assets**, and upload any image (AVIF, JPEG, PNG, or WebP).
+
+![Strapi Media Library showing one AVIF sample image uploaded](./images/01-media-library-upload-sample-image.png)
+
+### Create the Page collection type
+
+Open **Content-Type Builder** and click **+** next to **Collection Types**. Set the display name to `Page`. Strapi auto-fills the singular API ID (`page`) and the plural (`pages`).
+
+![Create a collection type dialog with Display name "Page", API ID "page", and plural "pages"](./images/02-create-page-collection-type.png)
+
+Click **Continue**. On the next screen, add a **Text** field (Short text) named `title`. Click **Add another field**, add a second **Text** field named `slug`.
+
+![Add new Text field dialog with Name "title" and Short text selected](./images/03-page-add-title-field.png)
+
+### Add the Dynamic Zone field
+
+With `title` and `slug` in place, click **Add new field** again. When the full field-type picker appears, choose **Dynamic zone** at the bottom right.
+
+![Field type picker showing all available types including Dynamic zone](./images/04-page-select-dynamic-zone-field.png)
+
+Name the field `blocks`. Before clicking **Add components to the zone**, open the **Advanced settings** tab and make sure **Draft & Publish** is enabled if you plan to use preview mode later. Then click **Add components to the zone**.
+
+![Add new Dynamic zone field dialog with Name set to "blocks"](./images/05-page-add-blocks-dynamic-zone.png)
+
+### Create the Hero component (`hero.hero`)
+
+In the "Add new component to the dynamic zone" modal, select **Create a new component**. Set the display name to `hero` and type `hero` as the category. Strapi creates the `hero.hero` UID from these two values.
+
+![Create new component dialog with display name "hero" and category "hero"](./images/06-hero-component-create.png)
+
+Click **Add first field to the component** and add the following **Text (Short text)** fields one after the other: `heading`, `subheading`, `ctaLabel`, `ctaUrl`. The screenshot shows the `heading` field being added.
+
+![Add new Text field for the Hero component with Name "heading" and Short text selected](./images/07-hero-add-heading-field.png)
+
+After the four text fields, add one more field: **Media → Single media**, named `image`. This is the hero background or foreground image.
+
+![Add new Media field for the Hero component with Name "image" and Single media selected](./images/08-hero-add-image-field.png)
+
+Click **Finish**.
+
+### Create the Rich-text component (`rich-text.rich-text`)
+
+Back in the dynamic zone modal, add another new component. Name it `rich-text` with category `rich-text` to produce the `rich-text.rich-text` UID.
+
+![Create new component dialog with display name "rich-text" and category "rich-text"](./images/09-richtext-component-create.png)
+
+Click **Add first field to the component**. Select **Rich text (Markdown)**, the classic plain-text Markdown editor, rather than Rich text (Blocks), which uses Strapi's JSON-based Lexical editor. This guide's `isRichTextHtml()` helper and `ReactMarkdown` renderer are tuned for plain-text Markdown output.
+
+![Field type picker for the Rich-text component with Rich text (Markdown) highlighted](./images/10-richtext-select-markdown-field.png)
+
+Name the field `content` and click **Finish**.
+
+![Add new Rich text (Markdown) field with Name "content"](./images/11-richtext-add-content-field.png)
+
+### Create the Feature-grid component (`feature-grid.feature-grid`)
+
+Add the third component to the dynamic zone. Name it `feature-grid` with category `feature-grid` to produce the `feature-grid.feature-grid` UID.
+
+![Create new component dialog with display name "feature-grid" and category "feature-grid"](./images/12-feature-grid-component-create.png)
+
+First, add a **Text (Short text)** field named `title`, which is the optional section heading that appears above the card grid.
+
+![Add new Text field for the Feature-grid component with Name "title"](./images/13-feature-grid-add-title-field.png)
+
+Next, add a **Component** field. In step 1 of 2, set the display name to `features` and the category to `features`. Strapi creates the nested `features.features` component.
+
+![Add new component (step 1 of 2) with display name "features" and category "features"](./images/14-feature-grid-add-features-component-step1.png)
+
+In step 2 of 2, name the field `feature` (singular; the code references `block.feature`), select `features - features` as the component, and choose **Repeatable component**. This lets editors add as many feature cards as they like.
+
+![Add new component (step 2 of 2) with Name "feature", component "features - features", and Repeatable component selected](./images/15-feature-grid-add-feature-repeatable-step2.png)
+
+### Add fields to the nested Features component (`features.features`)
+
+Click **Add first field to the component** to open the `features.features` editor. Add a **Text (Short text)** field named `heading`.
+
+![Add new Text field for the Features component with Name "heading"](./images/16-features-add-heading-field.png)
+
+Then add another **Text (Short text)** field named `subtext`, followed by **Media → Single media** named `image`. Each feature card will render heading, subtext, and an image.
+
+![Add new Media field for the Features component with Name "image" and Single media selected](./images/17-features-add-image-field.png)
+
+Click **Finish**, then click **Save** in the Content-Type Builder toolbar to apply all schema changes.
+
+### Create a home page entry and publish it
+
+Open **Content Manager → Page** and click **Create new entry**. Fill in:
+
+- **title**: anything (for example `Be the next store`)
+- **slug**: `home`
+
+Click **Add a component to blocks** and add all three block types. In the hero `image` field and each feature `image` field, link the sample image you uploaded in the first step. Click **Save → Publish**.
+
+![Completed home page entry in Strapi Content Manager showing hero, rich-text, and feature-grid blocks fully filled in](./images/18-page-entry-home-completed.png)
+
+Once you have saved the schema, open **Settings → API Tokens** (or configure Public role permissions under **Settings → Roles**) so your Next.js app can call `find` on pages with populated `blocks`.
 
 ## Create the Next.js frontend
 
@@ -155,7 +237,7 @@ strapi-frontend/
 ├── src/
 │   ├── app/
 │   │   ├── [slug]/
-│   │   │   ├── page.tsx              # Suspense shell — no Strapi await here
+│   │   │   ├── page.tsx              # Suspense shell, no Strapi await here
 │   │   │   └── loading.tsx           # Instant skeleton on navigation
 │   │   ├── page.tsx                  # Redirects / → /home
 │   │   ├── globals.css               # Tailwind v4 + design tokens
@@ -240,7 +322,7 @@ Create the `src/lib/strapi/populate.ts` file with two population strategies: one
 import qs from "qs";
 import type { BlockComponentUid } from "./types";
 
-/** Full population per block type — used when a block fetches its own data. */
+/** Full population per block type; used when a block fetches its own data. */
 export const blockPopulateByComponent = {
   "hero.hero": {
     populate: {
@@ -263,7 +345,7 @@ export const blockPopulateByComponent = {
   },
 } as const;
 
-/** Layout-only population — block ids and types, no nested media. */
+/** Layout-only population: block ids and types, no nested media. */
 export const pageLayoutPopulate = {
   blocks: {
     on: {
@@ -366,7 +448,7 @@ function strapiHeaders() {
   };
 }
 
-/** Fetches page layout only — block ids and component types, no block content. */
+/** Fetches page layout only: block ids and component types, no block content. */
 export async function fetchPageLayoutBySlug({
   slug,
   status,
@@ -489,7 +571,7 @@ export type DynamicZoneBlock =
 
 export type BlockComponentUid = DynamicZoneBlock["__component"];
 
-// ── Layout types (block ids only — no content) ────────────────────────────────
+// ── Layout types (block ids only, no content) ────────────────────────────────
 export type BlockLayout = {
   id: number;
   __component: BlockComponentUid;
@@ -643,13 +725,13 @@ export default function Home() {
 
 ### Streaming timeline
 
-![Streaming timeline showing three phases: generic skeleton at 0ms, block-aware skeletons at 200ms, and content streaming in at 500ms+](./streaming-timeline.svg)
+![Streaming timeline showing three phases: generic skeleton at 0ms, block-aware skeletons at 200ms, and content streaming in at 500ms+](./images/streaming-timeline.svg)
 
 When a visitor opens `/home` with four blocks:
 
 | Moment | What the user sees | Network |
 | --- | --- | --- |
-| 0 ms | Full skeleton stack | — |
+| 0 ms | Full skeleton stack | none |
 | Layout resolves | Per-block skeletons for the real page structure | 1 layout request |
 | Each block resolves | Real content replaces that block's skeleton | 1 request per block, in parallel |
 
@@ -699,7 +781,7 @@ Every block follows the same async shell pattern: receive layout props, call `fe
 
 ### Hero block
 
-![Hero block anatomy showing async shell receiving layout props and pure view rendering the dark hero section](./hero-block.svg)
+![Hero block anatomy showing async shell receiving layout props and pure view rendering the dark hero section](./images/hero-block.svg)
 
 Create `src/components/blocks/HeroBlock.tsx` to render a full-bleed hero section with an optional background image, heading, subheading, and CTA link:
 
@@ -976,7 +1058,7 @@ In the code above:
 
 ## Build the DynamicZoneRenderer
 
-![DynamicZoneRenderer showing per-block Suspense boundaries with hero and rich-text resolved and feature grid still showing its skeleton](./dynamic-zone-renderer.svg)
+![DynamicZoneRenderer showing per-block Suspense boundaries with hero and rich-text resolved and feature grid still showing its skeleton](./images/dynamic-zone-renderer.svg)
 
 Every block gets its own `Suspense` boundary. `BlockSlot` is an async server component that delegates to the registry. When a block's `fetchBlockById` suspends, only that block's skeleton shows.
 
@@ -1076,12 +1158,12 @@ In the code above:
 2. `PageBlocks` resolves the layout. Per-block skeletons replace the generic stack.
 3. Each `BlockSlot` suspends on its own `fetchBlockById`. Fast blocks (hero, rich text) paint before slow ones (feature grid with nested images).
 
-All blocks in this guide are Server Components — `DynamicZoneRenderer` stays on the server as well.
+All blocks in this guide are Server Components, and `DynamicZoneRenderer` stays on the server as well.
 
 When you add an interactive block later (accordion, map, carousel), split it into an async server shell that fetches data and a `'use client'` child for UI, or use `next/dynamic` to lazy-load the client bundle:
 
 ```tsx
-// File: src/blocks/registry.ts (excerpt — future interactive block)
+// File: src/blocks/registry.ts (excerpt for a future interactive block)
 import dynamic from "next/dynamic";
 
 const MapBlock = dynamic(() => import("@/components/blocks/MapBlock"), {
