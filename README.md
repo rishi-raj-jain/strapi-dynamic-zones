@@ -34,7 +34,7 @@ React Server Components give us that flexibility:
 | `populate=*` on every request | Explicit `on` fragments per block type |
 | Awaiting Strapi in `page.tsx` before any HTML | Return `<Suspense>` immediately & fetch layout inside an async child |
 
-The goal is **zero client JavaScript for CMS content** — every block in this guide is a Server Component.
+The goal is **zero client JavaScript for CMS content** - every block in this guide is a Server Component.
 
 ## Target architecture
 
@@ -139,7 +139,7 @@ strapi-frontend/
 ├── src/
 │   ├── app/
 │   │   ├── [slug]/
-│   │   │   ├── page.tsx              # Suspense shell — no Strapi await here
+│   │   │   ├── page.tsx              # Suspense shell - no Strapi await here
 │   │   │   └── loading.tsx           # Instant skeleton on navigation
 │   │   ├── page.tsx                  # Redirects / → /home
 │   │   ├── globals.css               # Tailwind v4 + design tokens
@@ -217,7 +217,7 @@ Create `src/lib/strapi/populate.ts` with two population strategies: one that fet
 import qs from "qs";
 import type { BlockComponentUid } from "./types";
 
-/** Full population per block type — used when a block fetches its own data. */
+/** Full population per block type - used when a block fetches its own data. */
 export const blockPopulateByComponent = {
   "hero.hero": {
     populate: {
@@ -240,7 +240,7 @@ export const blockPopulateByComponent = {
   },
 } as const;
 
-/** Layout-only population — block ids and types, no nested media. */
+/** Layout-only population - block ids and types, no nested media. */
 export const pageLayoutPopulate = {
   blocks: {
     on: {
@@ -342,7 +342,7 @@ function strapiHeaders() {
   };
 }
 
-/** Fetches page layout only — block ids and component types, no block content. */
+/** Fetches page layout only - block ids and component types, no block content. */
 export async function fetchPageLayoutBySlug({
   slug,
   status,
@@ -464,7 +464,7 @@ export type DynamicZoneBlock =
 
 export type BlockComponentUid = DynamicZoneBlock["__component"];
 
-// ── Layout types (block ids only — no content) ────────────────────────────────
+// ── Layout types (block ids only - no content) ────────────────────────────────
 export type BlockLayout = {
   id: number;
   __component: BlockComponentUid;
@@ -615,7 +615,7 @@ When a visitor opens `/home` with four blocks:
 
 | Moment | What the user sees | Network |
 | --- | --- | --- |
-| 0 ms | Full skeleton stack | — |
+| 0 ms | Full skeleton stack | - |
 | Layout resolves | Per-block skeletons for the real page structure | 1 layout request |
 | Each block resolves | Real content replaces that block's skeleton | 1 request per block, in parallel |
 
@@ -1015,12 +1015,12 @@ export function DynamicZoneRenderer({
 2. `PageBlocks` resolves the layout. Per-block skeletons replace the generic stack.
 3. Each `BlockSlot` suspends on its own `fetchBlockById`. Fast blocks (hero, rich text) paint before slow ones (feature grid with nested images).
 
-All blocks in this guide are Server Components — `DynamicZoneRenderer` stays on the server as well.
+All blocks in this guide are Server Components - `DynamicZoneRenderer` stays on the server as well.
 
 When you add an interactive block later (accordion, map, carousel), split it into an async server shell that fetches data and a `'use client'` child for UI, or use `next/dynamic` to lazy-load the client bundle:
 
 ```tsx
-// blocks/registry.ts (excerpt — future interactive block)
+// blocks/registry.ts (excerpt - future interactive block)
 import dynamic from "next/dynamic";
 
 const MapBlock = dynamic(() => import("@/components/blocks/MapBlock"), {
