@@ -624,7 +624,7 @@ export default function Home() {
 }
 ```
 
-### Streaming timeline
+### to-do Streaming timeline
 
 When a visitor opens `/home` with four blocks:
 
