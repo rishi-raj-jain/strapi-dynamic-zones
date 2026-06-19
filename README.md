@@ -42,6 +42,8 @@ The sections that follow put this into practice. You will start with the Strapi 
 
 ## Demo
 
+to-do-fix Before go guide see the demo below where even though you see skeleton loading immediately there is no client side fetch request is made but the content streams in from the blocks configured in Strapi:
+
 https://github.com/user-attachments/assets/5728e2b0-caf8-4413-99c9-c3204be08ad5
 
 ## Target architecture
