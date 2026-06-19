@@ -426,7 +426,7 @@ In the code above:
 - `fetchBlockById` hits `/api/pages` with an `on` fragment scoped to a single component type, then finds the matching entry by `id`. Each block calls this independently, so their fetches run in parallel.
 - Cache tags (`block:${slug}:${blockId}`) let you revalidate individual blocks from a Strapi webhook without invalidating the whole page.
 
-### Types: layout vs content
+### to-do-verb Types: layout vs content
 
 Create `src/lib/strapi/types.ts` with the following code that defines every Strapi content type, the `DynamicZoneBlock` discriminated union, and the shared layout helpers:
 
@@ -515,7 +515,9 @@ In the code above:
 - `BlockShellProps` extends `BlockLayout` with `slug` and `status`, giving each async block everything it needs to call `fetchBlockById`.
 - Full block interfaces (`HeroBlock`, `FeatureGridBlock`, etc.) describe the populated Strapi payload, not the layout shell. They are used only inside each block's view component.
 
-### Page route: shell first, fetch inside Suspense
+to-do-connector
+
+### to-do-dynamic-pages Page route: shell first, fetch inside Suspense
 
 Create `src/app/[slug]/page.tsx` with the following code, in a way that the page must not await a response from Strapi. It should return the page shell and a `Suspense` boundary immediately:
 
