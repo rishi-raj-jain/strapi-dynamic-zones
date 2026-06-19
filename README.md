@@ -222,7 +222,7 @@ to-do-connector
 
 ## Configure Dynamic Zone population
 
-In Strapi 5, the shared population strategy for components and Dynamic Zones was removed. You must use **`on` fragments** to declare population per component type ([docs](https://docs.strapi.io/cms/migration/v4-to-v5/breaking-changes/no-shared-population-strategy-components-dynamic-zones)).
+In Strapi 5, the shared population strategy for components and Dynamic Zones was removed. You must use `on` fragments to declare population per component type ([docs](https://docs.strapi.io/cms/migration/v4-to-v5/breaking-changes/no-shared-population-strategy-components-dynamic-zones)).
 
 Create the `src/lib/strapi/populate.ts` file with two population strategies: one that fetches only block ids for the layout phase, and one that fetches full block content per component type:
 
@@ -640,7 +640,7 @@ To observe streaming clearly in development, you can wrap the `fetch` call in `f
 
 ## Build the block registry
 
-Create `src/blocks/registry.ts`:
+to-do-complete Create `src/blocks/registry.ts`:
 
 ```ts
 import type { ComponentType } from "react";
@@ -671,7 +671,7 @@ export function isKnownBlock(
 }
 ```
 
-Registry entries now accept **`BlockShellProps`** (`id`, `__component`, `slug`, `status`) rather than the full Strapi payload. Each async block is responsible for fetching its own content.
+Registry entries now accept `BlockShellProps` (`id`, `__component`, `slug`, `status`) rather than the full Strapi payload. Each async block is responsible for fetching its own content.
 
 ## Build the block components
 
@@ -1088,7 +1088,7 @@ export function getStrapiMediaUrl(path: string) {
 }
 ```
 
-`src/components/StrapiImage.tsx` supports both fixed dimensions and **`fill`** mode. Use `fill` for hero and feature images when Strapi omits `width`/`height` (for example with AVIF uploads):
+`src/components/StrapiImage.tsx` supports both fixed dimensions and `fill` mode. Use `fill` for hero and feature images when Strapi omits `width`/`height` (for example with AVIF uploads):
 
 ```tsx
 import Image from "next/image";
@@ -1184,7 +1184,7 @@ next: { revalidate: 300, tags: [`page:${slug}`] },
 
 ## Set up draft preview
 
-In Strapi 5, we replaced `publicationState` with **`status`** (`draft` | `published`) ([migration guide](https://docs.strapi.io/cms/migration/v4-to-v5/breaking-changes/publication-state-removed)). You will pair that with [Next.js Draft Mode](https://nextjs.org/docs/app/guides/draft-mode).
+In Strapi 5, we replaced `publicationState` with `status` (`draft` | `published`) ([migration guide](https://docs.strapi.io/cms/migration/v4-to-v5/breaking-changes/publication-state-removed)). You will pair that with [Next.js Draft Mode](https://nextjs.org/docs/app/guides/draft-mode).
 
 ### Strapi admin preview config
 
