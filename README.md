@@ -218,6 +218,8 @@ export const ctaClassName =
   "inline-flex items-center justify-center rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-hover";
 ```
 
+to-do-connector
+
 ## Configure Dynamic Zone population
 
 In Strapi 5, we removed the shared population strategy for components and Dynamic Zones. You must use **`on` fragments** to declare population per component type ([docs](https://docs.strapi.io/cms/migration/v4-to-v5/breaking-changes/no-shared-population-strategy-components-dynamic-zones)).
