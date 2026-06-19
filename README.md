@@ -128,7 +128,7 @@ The packages above provide the following:
 - `react-markdown` & `remark-gfm`: renders markdown stored in Strapi richtext fields as HTML, with GitHub Flavored Markdown support (tables, strikethrough, task lists).
 - `@tailwindcss/typography`: the `prose` utility class for styling rendered richtext without writing custom CSS.
 
-Create a `.env.local` file at the project root with the following values:
+Next, create a `.env.local` file at the project root with the following values:
 
 ```bash
 NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
