@@ -647,7 +647,6 @@ When a visitor opens `/home` with four blocks:
 | Layout resolves | Per-block skeletons for the real page structure | 1 layout request |
 | Each block resolves | Real content replaces that block's skeleton | 1 request per block, in parallel |
 
-
 There is no `useEffect` and no client-side fetching of CMS content, every interaction with Strapi happens exclusively within async Server Components on the server.
 
 To observe streaming clearly in development, you can wrap the `fetch` call in `fetchBlockById` with a configurable delay: read a `FETCH_DELAY_MS` environment variable and call `await new Promise(r => setTimeout(r, ms))` before returning. Remove that variable before shipping to production.
