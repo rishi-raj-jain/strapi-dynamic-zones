@@ -1,6 +1,6 @@
 # Dynamic Zones in React Server Components (Next.js 16): Streaming Strapi Pages Without Client-Side Waterfalls
 
-I have always been curious about how developers can make it easier for marketing teams to ship new pages on their own. Take a product landing page, a campaign page, and a seasonal promo, for example. Each one follows roughly the same structure but with different content and a different arrangement of sections. Since the building blocks (things like an FAQ, a banner, or a feature grid) stay more or less the same across these marketing pages, the right answer is to give editors a set of reusable components they can compose themselves, and only loop developers in when a genuinely new kind of block is needed.
+I have always been curious about how developers can make it easier for marketing teams to ship new pages on their own. Take a product landing page, a campaign page, and a seasonal promo, for example. Each one follows roughly the same structure but with different content and a different arrangement of sections. Since the building blocks (things like a hero, rich text, or a feature grid) stay more or less the same across these marketing pages, the right answer is to give editors a set of reusable components they can compose themselves, and only loop developers in when a genuinely new kind of block is needed.
 
 That is exactly the problem [Dynamic Zones](https://strapi.io/features/dynamic-zone) solve in Strapi. Editors stack pre-built blocks in whatever order makes sense for each use case, and the codebase stays the same. Without a clear strategy though, you end up with blocks marked as client components "just in case", or have multiple `useEffect` hooks for media-heavy sections, and the page stalling on a waterfall of requests before anything meaningful appears.
 
@@ -27,12 +27,12 @@ React Server Components give us a much better contract:
 | Anti-pattern | RSC-friendly approach |
 | --- | --- |
 | `useEffect` + `fetch` per block on the client | Per-block `fetch` in **async Server Components**, wrapped in `Suspense` |
-| Entire page marked `'use client'` | Default to Server Components; opt into client only where needed |
+| Entire page marked `'use client'` | Default to Server Components; all blocks stay on the server |
 | One giant loading spinner | `loading.tsx` + page-level skeleton + per-block skeleton fallbacks |
 | `populate=*` on every request | Explicit `on` fragments per block type |
 | Awaiting Strapi in `page.tsx` before any HTML | Return `<Suspense>` immediately; fetch layout inside an async child |
 
-The goal is not zero client JavaScript. It is **minimal client JavaScript**, shipped only where interactivity actually requires it.
+The goal is **zero client JavaScript for CMS content** — every block in this guide is a Server Component.
 
 ## Target architecture
 
@@ -47,24 +47,19 @@ flowchart TB
     Registry["blockRegistry"]
     Hero["HeroBlock\n(fetch + render)"]
     Rich["RichTextBlock\n(fetch + render)"]
-    FAQ["FaqBlock\n(fetch) → FaqBlockClient"]
+    Grid["FeatureGridBlock\n(fetch + render)"]
     Page --> PB
   Loading -.-> Page
     PB --> DZ --> Slot --> Registry
     Registry --> Hero
     Registry --> Rich
-    Registry --> FAQ
-  end
-
-  subgraph client [Browser]
-    FAQClient["FaqBlockClient"]
-    FAQ --> FAQClient
+    Registry --> Grid
   end
 
   Strapi[(Strapi 5 REST API)] --> PB
   Strapi --> Hero
   Strapi --> Rich
-  Strapi --> FAQ
+  Strapi --> Grid
 ```
 
 A few key rules keep this architecture clean:
@@ -75,7 +70,6 @@ A few key rules keep this architecture clean:
 | **Layout fetch is small and fast** | `PageBlocks` fetches only block `id` + `__component` values to learn page structure. |
 | **Blocks own their data** | Each async block calls `fetchBlockById` on the server with `on` fragments scoped to that component. |
 | **Registry owns the mapping** | `__component` maps to a React component. |
-| **Boundaries are intentional** | Interactive UI lives in `'use client'` children; CMS fetches stay on the server. |
 | **Every block streams** | Each block gets its own `Suspense` fallback so fast blocks paint before slow ones finish. |
 
 ## Create the content model in Strapi
@@ -99,16 +93,14 @@ In Strapi 5, component UIDs follow the `category.component` naming pattern (the 
 | `hero.hero` | `heading`, `subheading`, `ctaLabel`, `ctaUrl`, `image` (media) | None | Server Component |
 | `rich-text.rich-text` | `content` (richtext / markdown) | None | Server Component |
 | `feature-grid.feature-grid` | `title`, `feature` (repeatable) | `features.features` | Server Component |
-| `faq.faq` | `item` (repeatable) | `items.items` | Server shell → `FaqBlockClient` (accordion) |
 
-Nested component schemas:
+Nested component schema:
 
 | UID | Fields |
 | --- | --- |
 | `features.features` | `heading`, `subtext` (text), `image` (media) |
-| `items.items` | `Question`, `Answer` (capitalized field names from the Strapi admin) |
 
-The feature grid uses `feature` (not `features`), and the FAQ uses `item` (not `items`). FAQ question and answer fields are capitalized (`Question`, `Answer`) as created in Strapi. You will normalize these in small helper modules so block components stay clean.
+The feature grid uses `feature` (not `features`). You will normalize repeatable items in a small helper module so the block component stays clean.
 
 Once you have saved the schema, open **Settings → API Tokens** (or configure Public role permissions) so your Next.js app can `find` pages with populated `blocks`. Create a page with slug `home` for the root redirect you will add later.
 
@@ -157,9 +149,7 @@ strapi-frontend/
 │   │   ├── blocks/
 │   │   │   ├── HeroBlock.tsx         # async server: fetch + view
 │   │   │   ├── RichTextBlock.tsx
-│   │   │   ├── FeatureGridBlock.tsx
-│   │   │   ├── FaqBlock.tsx          # async server: fetch → client
-│   │   │   └── FaqBlockClient.tsx    # 'use client' accordion
+│   │   │   └── FeatureGridBlock.tsx
 │   │   ├── dynamic-zone/
 │   │   │   ├── DynamicZoneRenderer.tsx
 │   │   │   ├── PageBlocks.tsx        # async: layout fetch
@@ -173,7 +163,6 @@ strapi-frontend/
 │   │   │   ├── populate.ts           # on fragments per block
 │   │   │   └── types.ts
 │   │   ├── feature-grid.ts           # normalize items + responsive grid classes
-│   │   ├── faq.ts                    # map Question/Answer → question/answer
 │   │   ├── richtext.ts               # HTML detection + prose classes
 │   │   ├── ui.ts                     # shared section/CTA class names
 │   │   └── utils.ts
@@ -247,11 +236,6 @@ export const blockPopulateByComponent = {
       },
     },
   },
-  "faq.faq": {
-    populate: {
-      item: true,
-    },
-  },
 } as const;
 
 /** Layout-only population — block ids and types, no nested media. */
@@ -261,7 +245,6 @@ export const pageLayoutPopulate = {
       "hero.hero": { fields: ["id"] },
       "rich-text.rich-text": { fields: ["id"] },
       "feature-grid.feature-grid": { fields: ["id"] },
-      "faq.faq": { fields: ["id"] },
     },
   },
 } as const;
@@ -309,11 +292,11 @@ export function buildBlockQuery(params: {
 
 In the code above:
 
-- `blockPopulateByComponent` defines the full population for each block type. Hero fetches image fields, feature grid populates nested feature images, and FAQ populates its repeatable items. This is used when each async block calls Strapi for its own content.
+- `blockPopulateByComponent` defines the full population for each block type. Hero fetches image fields, and the feature grid populates nested feature images. This is used when each async block calls Strapi for its own content.
 - `pageLayoutPopulate` fetches only the `id` for each block type. This keeps the initial layout request small: it returns enough to know the page structure without pulling any media or nested data.
 - `buildLayoutQuery` and `buildBlockQuery` use `qs` to serialize these objects into the nested query string format Strapi's REST API expects.
 
-Note that `populate=*` only goes one level deep, so hero images, nested `features.features` images inside the feature grid, and repeatable `items.items` inside FAQ will come back `null` in production. Explicit `on` rules keep payloads small and responses complete. See the [populate docs](https://docs.strapi.io/cms/api/rest/populate-select) for more detail.
+Note that `populate=*` only goes one level deep, so hero images and nested `features.features` images inside the feature grid will come back `null` in production. Explicit `on` rules keep payloads small and responses complete. See the [populate docs](https://docs.strapi.io/cms/api/rest/populate-select) for more detail.
 
 One thing to watch out for: the feature grid's `feature` field is a repeatable component (`features.features`) that contains media. You must nest `populate.image` under `feature`, not only set `feature: true`, otherwise the images will not come through.
 
@@ -472,24 +455,10 @@ export interface FeatureGridBlock {
   feature?: FeatureItem[] | null;
 }
 
-export interface FaqItem {
-  id: number;
-  Question?: string | null;
-  Answer?: string | null;
-}
-
-export interface FaqBlock {
-  id: number;
-  __component: "faq.faq";
-  item?: FaqItem[] | null;
-}
-
-// ── Discriminated union used by the registry and renderer ─────────────────────
 export type DynamicZoneBlock =
   | HeroBlock
   | RichTextBlock
-  | FeatureGridBlock
-  | FaqBlock;
+  | FeatureGridBlock;
 
 export type BlockComponentUid = DynamicZoneBlock["__component"];
 
@@ -623,7 +592,6 @@ export function PageLayoutSkeleton() {
       <BlockSkeleton variant="hero.hero" />
       <BlockSkeleton variant="rich-text.rich-text" />
       <BlockSkeleton variant="feature-grid.feature-grid" />
-      <BlockSkeleton variant="faq.faq" />
     </div>
   );
 }
@@ -664,7 +632,6 @@ import type { BlockComponentUid, BlockLayout, BlockShellProps } from "@/lib/stra
 import { HeroBlock } from "@/components/blocks/HeroBlock";
 import { RichTextBlock } from "@/components/blocks/RichTextBlock";
 import { FeatureGridBlock } from "@/components/blocks/FeatureGridBlock";
-import { FaqBlock } from "@/components/blocks/FaqBlock";
 
 type BlockRegistry = {
   [K in BlockComponentUid]: ComponentType<
@@ -676,7 +643,6 @@ export const blockRegistry: BlockRegistry = {
   "hero.hero": HeroBlock,
   "rich-text.rich-text": RichTextBlock,
   "feature-grid.feature-grid": FeatureGridBlock,
-  "faq.faq": FaqBlock,
 };
 
 const knownComponents = new Set<string>(Object.keys(blockRegistry));
@@ -692,7 +658,7 @@ Registry entries now accept **`BlockShellProps`** (`id`, `__component`, `slug`, 
 
 ## Build the block components
 
-Every block follows the same async shell pattern: receive layout props, call `fetchBlockById`, render a presentational child. FAQ splits the interactive accordion into `FaqBlockClient`.
+Every block follows the same async shell pattern: receive layout props, call `fetchBlockById`, render a presentational child.
 
 ### Hero (async Server Component)
 
@@ -954,98 +920,6 @@ function FeatureGridBlockView({ title, feature }: FeatureGridBlockData) {
 }
 ```
 
-### FAQ (Server shell + Client accordion)
-
-`src/components/blocks/FaqBlock.tsx` fetches on the server and passes data to the client accordion:
-
-```tsx
-import { fetchBlockById } from "@/lib/strapi/client";
-import { FaqBlockClient } from "@/components/blocks/FaqBlockClient";
-import type { BlockShellProps } from "@/lib/strapi/types";
-
-export async function FaqBlock({
-  id,
-  slug,
-  status,
-}: BlockShellProps & { __component: "faq.faq" }) {
-  const data = await fetchBlockById({
-    slug,
-    blockId: id,
-    component: "faq.faq",
-    status,
-  });
-
-  if (!data) return null;
-
-  return <FaqBlockClient item={data.item} />;
-}
-```
-
-First, create `src/lib/faq.ts` to normalize the capitalized field names that come from Strapi:
-
-```ts
-import type { FaqItem } from "@/lib/strapi/types";
-
-export function normalizeFaqItems(items: FaqItem[] | null | undefined) {
-  return (items ?? []).map((item) => ({
-    id: item.id,
-    question: item.Question ?? "",
-    answer: item.Answer ?? "",
-  }));
-}
-```
-
-Then create `src/components/blocks/FaqBlockClient.tsx`:
-
-```tsx
-"use client";
-
-import { useState } from "react";
-import { normalizeFaqItems } from "@/lib/faq";
-import { sectionClassName } from "@/lib/ui";
-import type { FaqItem } from "@/lib/strapi/types";
-
-export function FaqBlockClient({ item }: { item: FaqItem[] | null | undefined }) {
-  const items = normalizeFaqItems(item);
-  const [openId, setOpenId] = useState<number | null>(null);
-
-  if (!items.length) return null;
-
-  return (
-    <section className="bg-surface py-16 sm:py-20">
-      <div className={sectionClassName}>
-        <dl className="mx-auto max-w-3xl divide-y divide-border">
-          {items.map((faq) => (
-            <div key={faq.id} className="py-5">
-              <dt>
-                <button
-                  type="button"
-                  className="flex w-full items-start justify-between text-left"
-                  onClick={() => setOpenId(openId === faq.id ? null : faq.id)}
-                  aria-expanded={openId === faq.id}
-                >
-                  <span className="font-semibold text-zinc-950">{faq.question}</span>
-                  <span className="ml-6 shrink-0 text-muted">
-                    {openId === faq.id ? "−" : "+"}
-                  </span>
-                </button>
-              </dt>
-              {openId === faq.id ? (
-                <dd className="mt-3 text-base leading-relaxed text-muted">
-                  {faq.answer}
-                </dd>
-              ) : null}
-            </div>
-          ))}
-        </dl>
-      </div>
-    </section>
-  );
-}
-```
-
-**Important:** Client Components can be imported into Server Components. Next.js creates the boundary automatically. Do **not** mark `DynamicZoneRenderer` as `'use client'` unless you need hooks there.
-
 ## DynamicZoneRenderer with streaming
 
 Every block gets its own `Suspense` boundary. `BlockSlot` is an async server component that delegates to the registry. When a block's `fetchBlockById` suspends, only that block's skeleton shows.
@@ -1059,7 +933,6 @@ const heights: Partial<Record<string, string>> = {
   "hero.hero": "h-[520px]",
   "rich-text.rich-text": "h-48",
   "feature-grid.feature-grid": "h-80",
-  "faq.faq": "h-64",
 };
 
 export function BlockSkeleton({ variant }: { variant: BlockComponentUid | string }) {
@@ -1100,10 +973,6 @@ async function BlockSlot({
       const FeatureGrid = blockRegistry["feature-grid.feature-grid"];
       return <FeatureGrid {...shell} __component="feature-grid.feature-grid" />;
     }
-    case "faq.faq": {
-      const Faq = blockRegistry["faq.faq"];
-      return <Faq {...shell} __component="faq.faq" />;
-    }
     default:
       return null;
   }
@@ -1142,27 +1011,20 @@ export function DynamicZoneRenderer({
 
 1. `page.tsx` never awaits Strapi. The `Suspense` fallback (`PageLayoutSkeleton`) streams on the first byte.
 2. `PageBlocks` resolves the layout. Per-block skeletons replace the generic stack.
-3. Each `BlockSlot` suspends on its own `fetchBlockById`. Fast blocks (like hero and FAQ) paint before slow ones (like the feature grid with nested images).
+3. Each `BlockSlot` suspends on its own `fetchBlockById`. Fast blocks (hero, rich text) paint before slow ones (feature grid with nested images).
 
-Do **not** mark `DynamicZoneRenderer` as `'use client'`. Client boundaries live only inside blocks that need interactivity (`FaqBlockClient`).
+All blocks in this guide are Server Components — `DynamicZoneRenderer` stays on the server as well.
 
-For heavier interactive blocks like maps or carousels, use `next/dynamic` to split them into separate client chunks:
+When you add an interactive block later (accordion, map, carousel), split it into an async server shell that fetches data and a `'use client'` child for UI, or use `next/dynamic` to lazy-load the client bundle:
 
 ```tsx
-// blocks/registry.ts (excerpt)
+// blocks/registry.ts (excerpt — future interactive block)
 import dynamic from "next/dynamic";
 
 const MapBlock = dynamic(() => import("@/components/blocks/MapBlock"), {
   loading: () => <BlockSkeleton variant="map" />,
 });
-
-export const blockRegistry = {
-  // ...
-  "map.map": MapBlock,
-};
 ```
-
-The JavaScript for `MapBlock` only downloads when that block actually appears in the page's Dynamic Zone.
 
 ## Configure images from Strapi
 
@@ -1369,4 +1231,4 @@ To exit preview mode, link to `/api/preview?secret=...&status=published&slug=hom
 
 ## Summary
 
-In this guide, you created a Dynamic Zone content model in Strapi, defined two population strategies (`pageLayoutPopulate` for a fast layout fetch and `blockPopulateByComponent` for full block payloads), and built a streaming Next.js frontend where `page.tsx` never awaits Strapi directly. Each block lives in its own async Server Component, fetches its own content with `fetchBlockById`, and renders behind a `Suspense` boundary so fast blocks (hero, rich text) paint before slower ones (feature grid with nested images). Field quirks from Strapi (capitalized FAQ fields, repeatable `feature` and `item` names) are normalized in small helper modules so block components stay clean. Draft preview uses Strapi 5's `status` parameter paired with Next.js Draft Mode, and on-demand revalidation wires publish events back to Next.js cache tags. Start with `populate.ts`, `client.ts`, and `registry.ts`, then add each new Strapi block as an async shell component and a single registry entry.
+In this guide, you created a Dynamic Zone content model in Strapi, defined two population strategies (`pageLayoutPopulate` for a fast layout fetch and `blockPopulateByComponent` for full block payloads), and built a streaming Next.js frontend where `page.tsx` never awaits Strapi directly. Each block lives in its own async Server Component, fetches its own content with `fetchBlockById`, and renders behind a `Suspense` boundary so fast blocks (hero, rich text) paint before slower ones (feature grid with nested images). Repeatable `feature` items are normalized in a small helper module so the block component stays clean. Draft preview uses Strapi 5's `status` parameter paired with Next.js Draft Mode, and on-demand revalidation wires publish events back to Next.js cache tags. Start with `populate.ts`, `client.ts`, and `registry.ts`, then add each new Strapi block as an async shell component and a single registry entry.
