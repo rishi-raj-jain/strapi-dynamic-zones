@@ -946,11 +946,11 @@ In the code above:
 - 
 - 
 
-## DynamicZoneRenderer with streaming
+## to-do-verb DynamicZoneRenderer with streaming
 
 Every block gets its own `Suspense` boundary. `BlockSlot` is an async server component that delegates to the registry. When a block's `fetchBlockById` suspends, only that block's skeleton shows.
 
-Create `src/components/dynamic-zone/BlockSkeleton.tsx` with a height variant for each block type:
+to-do-complete Create `src/components/dynamic-zone/BlockSkeleton.tsx` with a height variant for each block type:
 
 ```tsx
 import type { BlockComponentUid } from "@/lib/strapi/types";
@@ -967,7 +967,7 @@ export function BlockSkeleton({ variant }: { variant: BlockComponentUid | string
 }
 ```
 
-Create `src/components/dynamic-zone/DynamicZoneRenderer.tsx`:
+to-do-complete Create `src/components/dynamic-zone/DynamicZoneRenderer.tsx`:
 
 ```tsx
 import { Suspense } from "react";
@@ -1031,9 +1031,14 @@ export function DynamicZoneRenderer({
 }
 ```
 
+In the code above:
+
+- 
+- 
+
 `BlockSkeleton` has a variant per block type (`hero.hero`, `feature-grid.feature-grid`, etc.) so each fallback matches the real section layout.
 
-### Why this streams
+### to-do-use-streaming-word-verb Why this streams
 
 1. `page.tsx` never awaits Strapi. The `Suspense` fallback (`PageLayoutSkeleton`) streams on the first byte.
 2. `PageBlocks` resolves the layout. Per-block skeletons replace the generic stack.
@@ -1056,7 +1061,7 @@ const MapBlock = dynamic(() => import("@/components/blocks/MapBlock"), {
 
 Next.js 16 blocks localhost image optimization by default. When your Strapi instance is running on `localhost:1337` during development, you will need to enable `dangerouslyAllowLocalIP` and include the port in `remotePatterns`.
 
-Update `next.config.ts`:
+Update `next.config.ts` with the following code:
 
 ```ts
 import type { NextConfig } from "next";
@@ -1084,7 +1089,7 @@ export default nextConfig;
 
 Note that `dangerouslyAllowLocalIP` is only needed in development when Strapi runs on a local IP address. In production, a public Strapi hostname works with `remotePatterns` alone and you can remove that flag.
 
-Create `src/lib/utils.ts`:
+Create `src/lib/utils.ts` with the following to handle the image URL switch:
 
 ```ts
 export function getStrapiMediaUrl(path: string) {
