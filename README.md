@@ -137,7 +137,7 @@ PREVIEW_SECRET=long_random_secret           # for draft preview route
 REVALIDATE_SECRET=another_long_secret       # for on-demand revalidation webhook
 ```
 
-Here is the folder structure you will end up with by the end of this guide:
+The following is the folder structure you will end up with by the end of this guide:
 
 ```
 strapi-frontend/
