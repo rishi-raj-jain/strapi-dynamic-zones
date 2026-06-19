@@ -1102,7 +1102,7 @@ export function getStrapiMediaUrl(path: string) {
 }
 ```
 
-`src/components/StrapiImage.tsx` supports both fixed dimensions and `fill` mode. Use `fill` for hero and feature images when Strapi omits `width`/`height` (for example with AVIF uploads):
+to-do-begin `src/components/StrapiImage.tsx` supports both fixed dimensions and `fill` mode. Use `fill` for hero and feature images when Strapi omits `width`/`height` (for example with AVIF uploads):
 
 ```tsx
 import Image from "next/image";
