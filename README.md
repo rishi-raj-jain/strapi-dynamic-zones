@@ -38,6 +38,8 @@ to-do-connector
 
 ## Target architecture
 
+to-do-opening
+
 ```mermaid
 flowchart TB
   subgraph server [Next.js Server]
@@ -64,7 +66,7 @@ flowchart TB
   Strapi --> Grid
 ```
 
-A few key rules keep this architecture clean:
+Overall, the archiecture to-do:
 
 | Rule | What it means |
 | --- | --- |
@@ -108,11 +110,14 @@ Once you have saved the schema, open **Settings → API Tokens** (or configure P
 
 ## Create the Next.js frontend
 
-Scaffold the frontend project and install the required packages:
+Let’s get started by creating a new Next.js project. Open your terminal and run the following command:
 
 ```bash
+# Create a new Next.js project
 npx create-next-app@latest strapi-frontend --ts --app --eslint --tailwind --src-dir
 cd strapi-frontend
+
+# Install required dependencies
 npm install qs react-markdown remark-gfm
 npm install -D @tailwindcss/typography @types/qs
 ```
