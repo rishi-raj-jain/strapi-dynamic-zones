@@ -328,7 +328,7 @@ This guide uses a **two-phase fetch** so the browser gets skeleton HTML immediat
 
 For mostly-static marketing pages, a single fully-populated fetch in `page.tsx` is fewer HTTP round-trips and often the simpler default. The two-phase pattern here trades that simplicity for streaming UX: skeletons appear first, block content streams in parallel, and all CMS fetches stay on the server.
 
-### Strapi client
+### Instantiate the Strapi client
 
 Create `src/lib/strapi/client.ts` with the following code to isolate and reuse Strapi API fetch logic across your application:
 
