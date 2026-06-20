@@ -218,9 +218,9 @@ npm install -D @tailwindcss/typography @types/qs
 
 The packages above install the following:
 
-- `qs`: builds the nested query strings that Strapi's REST API requires for filters, population, and status parameters.
-- `react-markdown` & `remark-gfm`: renders markdown stored in Strapi richtext fields as HTML, with GitHub Flavored Markdown support (tables, strikethrough, task lists).
-- `@tailwindcss/typography`: the `prose` utility class for styling rendered richtext without writing custom CSS.
+- [qs](https://npmjs.com/package/qs): builds the nested query strings that Strapi's REST API requires for filters, population, and status parameters.
+- [react-markdown](https://npmjs.com/package/react-markdown) & [remark-gfm](https://npmjs.com/package/remark-gfm): renders markdown stored in Strapi richtext fields as HTML, with GitHub Flavored Markdown support (tables, strikethrough, task lists).
+- [@tailwindcss/typography](https://npmjs.com/package/@tailwindcss/typography): the `prose` utility class for styling rendered richtext without writing custom CSS.
 
 Next, create a `.env.local` file at the project root. `STRAPI_API_TOKEN` is the Read Only token you just copied from Strapi. For `PREVIEW_SECRET` and `REVALIDATE_SECRET`, generate a random 32-byte hex string for each one by running the command below and pasting the output.
 
