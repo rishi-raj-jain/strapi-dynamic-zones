@@ -198,14 +198,7 @@ Click **Add a component to blocks** and add all three block types. In the hero `
 
 ![Completed home page entry in Strapi Content Manager showing hero, rich-text, and feature-grid blocks fully filled in](./images/18-page-entry-home-completed.png)
 
-Before moving on to the frontend, create an API token so Next.js can read data from Strapi without using admin credentials. Go to **Settings → API Tokens** and click **Create new API Token**. Fill in the details as follows.
-
-- **Name:** `Read Only`
-- **Description:** A default API token with read-only permissions, only used for accessing resources
-- **Token type:** Read-only
-- **Token duration:** Unlimited (or as you prefer)
-
-Click **Save**. Strapi generates the token and displays it once. Copy the value immediately and keep it somewhere safe, because you will paste it into your `.env.local` file in the next step.
+Before moving on to the frontend, create an API token so Next.js can read data from Strapi without using admin credentials. Go to **Settings → API Tokens**, copy the auto-generated **Read Only** token, and keep it somewhere safe, because you will paste it into your `.env.local` file in the next step.
 
 ![Strapi Settings panel showing a newly generated Read Only API token with token type set to Read-only and unlimited duration](./images/read-only-api-token.png)
 
