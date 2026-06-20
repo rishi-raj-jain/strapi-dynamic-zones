@@ -1367,6 +1367,8 @@ Your page route reads `draftMode()` and passes `status: "draft"` into `PageBlock
 
 To exit preview mode, link to `/api/preview?secret=...&status=published&slug=home` or call `draftMode().disable()` from a dedicated "Exit preview" button.
 
-## Summary
+## Conclusion
 
-In this guide, you created a Dynamic Zone content model in Strapi, defined two population strategies (`pageLayoutPopulate` for a fast layout fetch and `blockPopulateByComponent` for full block payloads), and built a streaming Next.js frontend where `page.tsx` never awaits Strapi directly. Each block lives in its own async Server Component, fetches its own content with `fetchBlockById`, and renders behind a `Suspense` boundary so fast blocks (hero, rich text) paint before slower ones (feature grid with nested images). Repeatable `feature` items are normalized in a small helper module so the block component stays clean. Draft preview uses Strapi 5's `status` parameter paired with Next.js Draft Mode, and on-demand revalidation wires publish events back to Next.js cache tags. Start with `populate.ts`, `client.ts`, and `registry.ts`, then add each new Strapi block as an async shell component and a single registry entry.
+The two-phase fetch pattern scales beyond the three blocks built here. Any async Server Component can be dropped into `blockRegistry` with a single entry, and it automatically gets its own `Suspense` boundary, its own `on` population fragment, and its own cache tag, all without touching `DynamicZoneRenderer` or `page.tsx`.
+
+Once `page.tsx` stops awaiting Strapi, every data dependency becomes independently streamable. Editors get a block composer that does not require a deploy to rearrange a page. Visitors get a page that feels instant because skeleton HTML is on the wire before the first Strapi fetch completes. And the Next.js Data Cache, seeded by `force-cache` and invalidated by tag-based webhooks, means most requests never reach Strapi at all.
