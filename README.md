@@ -1361,6 +1361,8 @@ export async function GET(request: Request) {
 }
 ```
 
+![Diagram showing two paths through the preview route: entering draft preview calls draftMode().enable() and passes status="draft" to Strapi, while exiting calls draftMode().disable() and reverts to status="published"](./images/draft-preview-flow.svg)
+
 Your page route reads `draftMode()` and passes `status: "draft"` into `PageBlocks` and each block's `fetchBlockById` call, so editors can see unpublished blocks without exposing draft content to visitors.
 
 To exit preview mode, link to `/api/preview?secret=...&status=published&slug=home` or call `draftMode().disable()` from a dedicated "Exit preview" button.
