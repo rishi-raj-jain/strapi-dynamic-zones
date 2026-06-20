@@ -1311,7 +1311,11 @@ export async function POST(request: Request) {
 }
 ```
 
-Set up a Strapi webhook on `entry.publish` that calls this route and passes the secret header. Note that in Next.js 16, `revalidateTag` requires a second argument (`"max"` is the recommended profile) and omitting it is a type error.
+To wire Strapi up to this route, go to **Settings → Webhooks** and click **Create new webhook**. Give it a name (for example `Entry changes`), set the URL to `https://your-domain.com/api/revalidate`, add a header with key `x-revalidate-secret` and your `REVALIDATE_SECRET` value, then check the **Update**, **Delete**, **Publish**, and **Unpublish** events for the Entry row.
+
+![Strapi Settings panel showing the Create a webhook form filled in with name "Entry changes", URL pointing to /api/revalidate, an x-revalidate-secret header, and Entry UPDATE, DELETE, PUBLISH, and UNPUBLISH events selected](./images/19-settings-webhook-create.png)
+
+Click **Save**. From this point on, every publish, update, or delete in the Strapi content manager triggers a POST to your revalidation route, which purges `strapi-pages` globally and the specific `page:<slug>` tag if the payload includes a slug. Note that in Next.js 16, `revalidateTag` requires a second argument (`"max"` is the recommended profile) and omitting it is a type error.
 
 ### Time-based fallback
 
@@ -1324,34 +1328,7 @@ next: { revalidate: 300, tags: [`page:${slug}`] },
 
 ## Set up draft preview
 
-In Strapi 5, we replaced `publicationState` with `status` (`draft` | `published`) ([migration guide](https://docs.strapi.io/cms/migration/v4-to-v5/breaking-changes/publication-state-removed)). You will pair that with [Next.js Draft Mode](https://nextjs.org/docs/app/guides/draft-mode).
-
-### Configure Strapi admin preview
-
-In `config/admin.ts` of your Strapi project, configure preview URLs to point to your Next.js route ([Preview feature docs](https://docs.strapi.io/cms/features/preview)):
-
-```ts
-// File: config/admin.ts
-export default ({ env }) => ({
-  preview: {
-    enabled: true,
-    config: {
-      allowedOrigins: [env("CLIENT_URL", "http://localhost:3000")],
-      async handler(uid, { documentId, locale, status }) {
-        const clientUrl = env("CLIENT_URL", "http://localhost:3000");
-        const params = new URLSearchParams({
-          secret: env("PREVIEW_SECRET"),
-          uid,
-          documentId,
-          locale: locale ?? "en",
-          status: status ?? "draft",
-        });
-        return `${clientUrl}/api/preview?${params.toString()}`;
-      },
-    },
-  },
-});
-```
+In Strapi 5, `publicationState` was replaced with `status` (`draft` | `published`) ([migration guide](https://docs.strapi.io/cms/migration/v4-to-v5/breaking-changes/publication-state-removed)). You will pair that with [Next.js Draft Mode](https://nextjs.org/docs/app/guides/draft-mode).
 
 ### Create the Next.js preview route
 
