@@ -88,7 +88,7 @@ The architecture follows five rules that keep every data fetch on the server and
 
 ## Create the content model in Strapi
 
-Let's start in Strapi by modeling the pages that editors will fill in. The goal is a **Page** collection type with a `blocks` Dynamic Zone containing three reusable components (a hero, a rich-text block, and a feature grid) that editors can arrange in any order. The table below summarises the full schema; the step-by-step walkthrough that follows shows every click.
+Let's start in Strapi by modeling the pages that editors will fill in. The goal is a **Page** collection type with a `blocks` Dynamic Zone containing three reusable components (a hero, a rich-text block, and a feature grid) that editors can arrange in any order. The table below summarises the full schema, and the step-by-step walkthrough that follows shows every click.
 
 | Collection type | Fields |
 | --- | --- |
@@ -171,7 +171,7 @@ Next, add a **Component** field. In step 1 of 2, set the display name to `featur
 
 ![Add new component (step 1 of 2) with display name "features" and category "features"](./images/14-feature-grid-add-features-component-step1.png)
 
-In step 2 of 2, name the field `feature` (singular; the code references `block.feature`), select `features - features` as the component, and choose **Repeatable component**. This lets editors add as many feature cards as they like.
+In step 2 of 2, name the field `feature` (singular, since the code references `block.feature`), select `features - features` as the component, and choose **Repeatable component**. This lets editors add as many feature cards as they like.
 
 ![Add new component (step 2 of 2) with Name "feature", component "features - features", and Repeatable component selected](./images/15-feature-grid-add-feature-repeatable-step2.png)
 
@@ -198,7 +198,16 @@ Click **Add a component to blocks** and add all three block types. In the hero `
 
 ![Completed home page entry in Strapi Content Manager showing hero, rich-text, and feature-grid blocks fully filled in](./images/18-page-entry-home-completed.png)
 
-Once you have saved the schema, open **Settings → API Tokens** (or configure Public role permissions under **Settings → Roles**) so your Next.js app can call `find` on pages with populated `blocks`.
+Before moving on to the frontend, create an API token so Next.js can read data from Strapi without using admin credentials. Go to **Settings → API Tokens** and click **Create new API Token**. Fill in the details as follows.
+
+- **Name:** `Read Only`
+- **Description:** A default API token with read-only permissions, only used for accessing resources
+- **Token type:** Read-only
+- **Token duration:** Unlimited
+
+Click **Save**. Strapi generates the token and displays it once. Copy the value immediately and keep it somewhere safe, because you will paste it into your `.env.local` file in the next step.
+
+![Strapi Settings panel showing a newly generated Read Only API token with token type set to Read-only and unlimited duration](./images/read-only-api-token.png)
 
 ## Create the Next.js frontend
 
@@ -322,7 +331,7 @@ Create the `src/lib/strapi/populate.ts` file with two population strategies: one
 import qs from "qs";
 import type { BlockComponentUid } from "./types";
 
-/** Full population per block type; used when a block fetches its own data. */
+/** Full population per block type, used when a block fetches its own data. */
 export const blockPopulateByComponent = {
   "hero.hero": {
     populate: {
