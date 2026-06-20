@@ -225,6 +225,7 @@ The packages above install the following:
 Next, create a `.env.local` file at the project root. `STRAPI_API_TOKEN` is the Read Only token you just copied from Strapi. For `PREVIEW_SECRET` and `REVALIDATE_SECRET`, generate a random 32-byte hex string for each one by running the command below and pasting the output.
 
 ```bash
+# Generate a 32 character secret
 openssl rand -hex 32
 ```
 
