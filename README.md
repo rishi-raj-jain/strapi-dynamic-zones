@@ -203,7 +203,7 @@ Before moving on to the frontend, create an API token so Next.js can read data f
 - **Name:** `Read Only`
 - **Description:** A default API token with read-only permissions, only used for accessing resources
 - **Token type:** Read-only
-- **Token duration:** Unlimited
+- **Token duration:** Unlimited (or as you prefer)
 
 Click **Save**. Strapi generates the token and displays it once. Copy the value immediately and keep it somewhere safe, because you will paste it into your `.env.local` file in the next step.
 
