@@ -229,14 +229,18 @@ The packages above install the following:
 - `react-markdown` & `remark-gfm`: renders markdown stored in Strapi richtext fields as HTML, with GitHub Flavored Markdown support (tables, strikethrough, task lists).
 - `@tailwindcss/typography`: the `prose` utility class for styling rendered richtext without writing custom CSS.
 
-Next, create a `.env.local` file at the project root with the following values:
+Next, create a `.env.local` file at the project root. `STRAPI_API_TOKEN` is the Read Only token you just copied from Strapi. For `PREVIEW_SECRET` and `REVALIDATE_SECRET`, generate a random 32-byte hex string for each one by running the command below and pasting the output.
+
+```bash
+openssl rand -hex 32
+```
 
 ```bash
 # File: .env.local
 NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
-STRAPI_API_TOKEN=your_token_here          # optional but recommended
-PREVIEW_SECRET=long_random_secret           # for draft preview route
-REVALIDATE_SECRET=another_long_secret       # for on-demand revalidation webhook
+STRAPI_API_TOKEN=your_token_here
+PREVIEW_SECRET=<output of openssl rand -hex 32>
+REVALIDATE_SECRET=<output of openssl rand -hex 32>
 ```
 
 Now before you proceed to the next step, here is the folder structure you will end up with by the end of this guide:
