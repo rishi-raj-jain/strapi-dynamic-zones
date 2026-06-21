@@ -14,7 +14,7 @@ To follow along in this guide, you will need the following:
 
 ## The waterfall problem
 
-![Waterfall timing diagram showing five sequential blocked requests totalling ~2.2 s before the page renders](./images/waterfall-problem.svg)
+![Waterfall timing diagram showing five sequential blocked requests totalling ~2.2 s before the page renders](./images/waterfall-problem.png)
 
 Let's start by looking at a common pattern found in early attempts to build dynamic, CMS-driven pages:
 
@@ -28,7 +28,7 @@ The better solution is to move these data fetches to the server, so the HTML can
 
 React Server Components give us that flexibility:
 
-![RSC streaming diagram showing parallel server fetches and skeleton HTML arriving at 0ms, with content streaming in progressively](./images/rsc-streaming.svg)
+![RSC streaming diagram showing parallel server fetches and skeleton HTML arriving at 0ms, with content streaming in progressively](./images/rsc-streaming.png)
 
 | Anti-pattern | RSC-friendly approach |
 | --- | --- |
@@ -732,7 +732,7 @@ export default function Home() {
 
 ### Streaming timeline
 
-![Streaming timeline showing three phases: generic skeleton at 0ms, block-aware skeletons at 200ms, and content streaming in at 500ms+](./images/streaming-timeline.svg)
+![Streaming timeline showing three phases: generic skeleton at 0ms, block-aware skeletons at 200ms, and content streaming in at 500ms+](./images/streaming-timeline.png)
 
 When a visitor opens `/home` with four blocks:
 
@@ -788,7 +788,7 @@ Every block follows the same async shell pattern: receive layout props, call `fe
 
 ### Hero block
 
-![Hero block anatomy showing async shell receiving layout props and pure view rendering the dark hero section](./images/hero-block.svg)
+![Hero block anatomy showing async shell receiving layout props and pure view rendering the dark hero section](./images/hero-block.png)
 
 Create `src/components/blocks/HeroBlock.tsx` to render a full-bleed hero section with an optional background image, heading, subheading, and CTA link:
 
@@ -1065,7 +1065,7 @@ In the code above:
 
 ## Build the DynamicZoneRenderer
 
-![DynamicZoneRenderer showing per-block Suspense boundaries with hero and rich-text resolved and feature grid still showing its skeleton](./images/dynamic-zone-renderer.svg)
+![DynamicZoneRenderer showing per-block Suspense boundaries with hero and rich-text resolved and feature grid still showing its skeleton](./images/dynamic-zone-renderer.png)
 
 Every block gets its own `Suspense` boundary. `BlockSlot` is an async server component that delegates to the registry. When a block's `fetchBlockById` suspends, only that block's skeleton shows.
 
@@ -1361,7 +1361,7 @@ export async function GET(request: Request) {
 }
 ```
 
-![Diagram showing two paths through the preview route: entering draft preview calls draftMode().enable() and passes status="draft" to Strapi, while exiting calls draftMode().disable() and reverts to status="published"](./images/draft-preview-flow.svg)
+![Diagram showing two paths through the preview route: entering draft preview calls draftMode().enable() and passes status="draft" to Strapi, while exiting calls draftMode().disable() and reverts to status="published"](./images/draft-preview-flow.png)
 
 Your page route reads `draftMode()` and passes `status: "draft"` into `PageBlocks` and each block's `fetchBlockById` call, so editors can see unpublished blocks without exposing draft content to visitors.
 
