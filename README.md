@@ -50,31 +50,7 @@ https://github.com/user-attachments/assets/5728e2b0-caf8-4413-99c9-c3204be08ad5
 
 Before writing any code, it helps to understand the full request path. The diagram below maps what happens from the moment a visitor opens `/home` to each block's content streaming in through its own `Suspense` boundary.
 
-```mermaid
-flowchart TB
-  subgraph server [Next.js Server]
-    Page["app/[slug]/page.tsx\n(Suspense shell)"]
-    Loading["loading.tsx\n(instant skeleton)"]
-    PB["PageBlocks\n(async: layout fetch)"]
-    DZ["DynamicZoneRenderer"]
-    Slot["BlockSlot\n(async per block)"]
-    Registry["blockRegistry"]
-    Hero["HeroBlock\n(fetch + render)"]
-    Rich["RichTextBlock\n(fetch + render)"]
-    Grid["FeatureGridBlock\n(fetch + render)"]
-    Page --> PB
-  Loading -.-> Page
-    PB --> DZ --> Slot --> Registry
-    Registry --> Hero
-    Registry --> Rich
-    Registry --> Grid
-  end
-
-  Strapi[(Strapi 5 REST API)] --> PB
-  Strapi --> Hero
-  Strapi --> Rich
-  Strapi --> Grid
-```
+![Request flow: a visitor requests a page, Next.js streams the shell and a Suspense-wrapped block list immediately, each block triggers its own async server fetch in parallel, and content for each block streams in independently as the server responds. This enables instant skeleton HTML, parallel data requests on the server, and progressive hydration for every block.](./images/architecture-flow.png)
 
 The architecture follows five rules that keep every data fetch on the server and every block independently streamable:
 
